@@ -78,7 +78,7 @@ public class ProductServiceImpl implements ProductService{
 			productRepo.save(product);
 			return product;
 		} catch (NoSuchElementException e) {
-			throw new NoSuchProductFound("Product with this id " + pid + " Not found");
+			throw new NoSuchProductFound("Product with this id " +pid+ " Not found");
 		}
 
 	}
