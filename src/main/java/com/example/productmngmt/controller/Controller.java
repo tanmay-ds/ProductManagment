@@ -9,7 +9,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -33,50 +32,46 @@ public class Controller {
 	ProductService proService;
 
 	@PostMapping("create")
-	public ResponseEntity<?> createProduct(@Valid @RequestBody List<@Valid Product> products) {
+	public ResponseEntity<List<String>> createProduct(@Valid @RequestBody List<@Valid Product> products) {
 		return ResponseEntity.ok(proService.create(products));
 	}
 
 	@GetMapping("getproduct/{pid}")
-	public ResponseEntity<?> getProduct(@PathVariable Long pid) {
+	public ResponseEntity<Product> getProduct(@PathVariable Long pid) {
 		return ResponseEntity.ok(proService.getProduct(pid));
 	}
 
 	@PutMapping("update/{pid}")
-	public ResponseEntity<?> updateProduct(@PathVariable Long pid, @RequestBody Product product) {
+	public ResponseEntity<Product> updateProduct(@PathVariable Long pid, @RequestBody Product product) {
 		return ResponseEntity.ok(proService.updateProd(pid, product));
 	}
 
 	@GetMapping("getall")
 
-	public Page<Product> getall(Pageable pageable) {
-		return proService.getAll(pageable);
+	public ResponseEntity<Page<Product>> getall(Pageable pageable) {
+		return ResponseEntity.ok(proService.getAll(pageable));
 	}
 
 	@GetMapping("getall/{search}")
 
-	public Page<Product> getall(@PathVariable String search, Pageable pageable) {
-		return proService.getAll(search, pageable);
+	public ResponseEntity<Page<Product>> getall(@PathVariable String search, Pageable pageable) {
+		return ResponseEntity.ok(proService.getAll(search, pageable));
 	}
 
 	@DeleteMapping("delete/{pid}")
-	public ResponseEntity<?> deleteProduct(@PathVariable Long pid) {
-		return new ResponseEntity<ResponseMessage>(
-				new ResponseMessage(new Date(), HttpStatus.OK, "Product with Id : " + proService.deleteProd(pid) + " is deleted"),
-				new HttpHeaders(), HttpStatus.OK);
+	public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long pid) {
+		return ResponseEntity.ok(new ResponseMessage(
+				new Date(), HttpStatus.OK, "Product with Id : " + proService.deleteProd(pid) + " is deleted"));
 	}
 
 	@PostMapping("addStock")
-	public ResponseEntity<?> addStock(@RequestBody Map<Long, Long> stockList) {
-		return new ResponseEntity<ResponseMessage>(
-				new ResponseMessage(new Date(), HttpStatus.OK, proService.addStock(stockList)),
-				new HttpHeaders(), HttpStatus.OK);
+	public ResponseEntity<ResponseMessage> addStock(@RequestBody Map<Long, Long> stockList) {
+		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK, proService.addStock(stockList)));
 	}
 
 	@PostMapping("removeStock")
-	public ResponseEntity<?> removeStock(@RequestBody Map<Long, Long> stockList) {
-		return new ResponseEntity<ResponseMessage>(
-				new ResponseMessage(new Date(), HttpStatus.OK, proService.removeStock(stockList)),
-				new HttpHeaders(), HttpStatus.OK);
+	public ResponseEntity<ResponseMessage> removeStock(@RequestBody Map<Long, Long> stockList) {
+		return ResponseEntity.ok(
+				new ResponseMessage(new Date(), HttpStatus.OK, proService.removeStock(stockList)));
 	}
 }

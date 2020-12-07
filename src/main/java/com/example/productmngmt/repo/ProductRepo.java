@@ -1,19 +1,21 @@
 package com.example.productmngmt.repo;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 
 import com.example.productmngmt.entity.Product;
+import com.example.productmngmt.template.ProductRepositoryTemplate;
 
-public interface ProductRepo extends MongoRepository<Product,Long>{
+public interface ProductRepo extends MongoRepository<Product,Long>, ProductRepositoryTemplate {
 
 	Optional<Product> findByName(String name);
 	
-	@Query("{'name': {$regex :?0}}")
+	List<Product> findProductByNameIgnoreCase(String productName);
+
 	Page<Product> findByNamePartialSearch(String regex,Pageable pageable);
 	
 }

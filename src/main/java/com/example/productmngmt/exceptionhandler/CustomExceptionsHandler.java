@@ -14,17 +14,17 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class CustomExceptionsHandler extends ResponseEntityExceptionHandler{
 	
 	@ExceptionHandler(NoSuchProductFound.class)
-	public final ResponseEntity<?> noProductFound(NoSuchProductFound e,WebRequest request){
+	public final ResponseEntity<ResponseMessage> noProductFound(NoSuchProductFound e,WebRequest request){
 		return new ResponseEntity<>(new ResponseMessage(new Date(),HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage()),new HttpHeaders(),HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	@ExceptionHandler(ProductAlreadyExists.class)
-	public final ResponseEntity<?> productHandler(ProductAlreadyExists e,WebRequest request){
+	public final ResponseEntity<ResponseMessage> productHandler(ProductAlreadyExists e,WebRequest request){
 		return new ResponseEntity<>(new ResponseMessage(new Date(),HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage()),new HttpHeaders(),HttpStatus.INTERNAL_SERVER_ERROR);		
 	}
 	
 	@ExceptionHandler(NegativeArgumentException.class)
-	public final ResponseEntity<?> negativeArgument(NegativeArgumentException e,WebRequest request){
+	public final ResponseEntity<ResponseMessage> negativeArgument(NegativeArgumentException e,WebRequest request){
 		return new ResponseEntity<>(new ResponseMessage(new Date(),HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage()),new HttpHeaders(),HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

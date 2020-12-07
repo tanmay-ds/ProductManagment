@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.productmngmt.dto.Dtos;
@@ -22,7 +23,7 @@ import com.example.productmngmt.service.ProductService;
 import com.example.productmngmt.service.SequenceGenrationService;
 
 @Service
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	ProductRepo productRepo;
@@ -31,74 +32,72 @@ public class ProductServiceImpl implements ProductService{
 	SequenceGenrationService genrationService;
 
 	@Autowired
+	MongoTemplate mongoTemplate;
+
+	@Autowired
 	Dtos dtos;
-	
+
 	@Override
 	public List<String> create(List<Product> products) {
 
-		try {
-			List<Product> saveProducts = new ArrayList<Product>();
-			List<String> messages = new ArrayList<String>();
-			for (Product product : products) {
-				Optional<Product> checkProduct = productRepo.findByName(product.getName());
-				if (checkProduct.isPresent()) {
-					throw new ProductAlreadyExists("Product With name: " + product.getName() + " Already Exists");
-				}
+			List<Product> saveProducts = new ArrayList<>();
+			List<String> productNames = products.stream()
+					.map(product-> product.getName().toLowerCase())
+					.collect(Collectors.toList());			
+			List<String> messages = new ArrayList<>();
+			List<String> checkProducts = productRepo.findAll().stream()
+					.filter(name -> productNames.contains(name.getName().toLowerCase()))
+					.map(product-> product.getName().toLowerCase())
+					.collect(Collectors.toList());
 
+			if(!checkProducts.isEmpty()) {
+				throw new ProductAlreadyExists("Product With name: " + checkProducts + " Already Exists");
+			}
+			
+			for (Product product : products) {
 				product.setProdId(genrationService.generateSequence(Product.SEQUENCE_NAME));
 				product.setQuantity(0l);
 				messages.add("Product added with Id: " + product.getProdId());
 				saveProducts.add(product);
 			}
+			
 			productRepo.saveAll(saveProducts);
 			return messages;
-		} catch (IllegalArgumentException e) {
-			throw new NoSuchElementException("Product Not Added Successfully");
-		}
 	}
 
 	@Override
 	public Product getProduct(Long pid) {
-
-		try {
-			Product getProduct = productRepo.findById(pid).orElseThrow(() -> new NoSuchElementException());
-			return getProduct;
-		} catch (NoSuchElementException e) {
+		Optional<Product> getProduct = productRepo.findById(pid);
+		if (getProduct.isPresent()) {
+			return dtos.optionalToProduct(getProduct);
+		} else {
 			throw new NoSuchProductFound("Product with this id " + pid + " Not found");
 		}
-
 	}
 
 	@Override
 	public Product updateProd(Long pid, Product product) {
-		try {
-			Product checkProduct = productRepo.findById(pid).orElseThrow(() -> new NoSuchElementException());
-			product.setProdId(checkProduct.getProdId());
-			product.setQuantity(checkProduct.getQuantity());
-			productRepo.save(product);
-			return product;
-		} catch (NoSuchElementException e) {
+		Optional<Product> checkProduct = productRepo.findById(pid);
+		if (checkProduct.isPresent()) {
+			product.setProdId(checkProduct.get().getProdId());
+			product.setQuantity(checkProduct.get().getQuantity());
+			return productRepo.save(product);
+		} else
 			throw new NoSuchProductFound("Product with this id " + pid + " Not found");
-		}
-
 	}
 
 	@Override
 	public Page<Product> getAll(Pageable pageable) {
-		Page<Product> products = productRepo.findAll(pageable);
-		return products;
+		return productRepo.findAll(pageable);
 	}
 
 	@Override
 	public Page<Product> getAll(String search, Pageable pageable) {
 		Page<Product> products = productRepo.findByNamePartialSearch(search, pageable);
-		try {
-			if (products.isEmpty())
-				throw new NoSuchElementException();
-		} catch (NoSuchElementException e) {
+		if (products.isEmpty())
 			throw new NoSuchProductFound("No Result Found");
-		}
-		return products;
+		else
+			return products;
 	}
 
 	@Override
@@ -116,8 +115,8 @@ public class ProductServiceImpl implements ProductService{
 
 	@Override
 	public String addStock(Map<Long, Long> stockList) {
-		List<Long> ids = new ArrayList<Long>();
-		List<Long> quantities = new ArrayList<Long>();
+		List<Long> ids = new ArrayList<>();
+		List<Long> quantities = new ArrayList<>();
 		for (Map.Entry<Long, Long> m : stockList.entrySet()) {
 			if (m.getKey() < 0 || m.getValue() < 0) {
 				throw new NegativeArgumentException("Ids Or Quantity Cannot be Negative");
@@ -126,12 +125,12 @@ public class ProductServiceImpl implements ProductService{
 			quantities.add(m.getValue());
 		}
 		for (Long id : ids) {
-
-			try {
-				Product checkProduct = productRepo.findById(id).orElseThrow(() -> new NoSuchElementException());
-				checkProduct.setQuantity(checkProduct.getQuantity() + quantities.get(ids.indexOf(id)));
-				productRepo.save(checkProduct);
-			} catch (NoSuchElementException e) {
+			Optional<Product> checkProduct = productRepo.findById(id);
+			Product product = dtos.optionalToProduct(checkProduct);
+			if (checkProduct.isPresent()) {
+				product.setQuantity(checkProduct.get().getQuantity() + quantities.get(ids.indexOf(id)));
+				productRepo.save(product);
+			} else {
 				throw new NoSuchProductFound("Product with this id " + id + " Not found");
 			}
 		}
@@ -141,8 +140,8 @@ public class ProductServiceImpl implements ProductService{
 
 	@Override
 	public String removeStock(Map<Long, Long> stockList) {
-		List<Long> ids = new ArrayList<Long>();
-		List<Long> quantities = new ArrayList<Long>();
+		List<Long> ids = new ArrayList<>();
+		List<Long> quantities = new ArrayList<>();
 		for (Map.Entry<Long, Long> m : stockList.entrySet()) {
 			if (m.getKey() < 0 || m.getValue() < 0) {
 				throw new NegativeArgumentException("Ids Or Quantity Cannot be Negative");
@@ -150,17 +149,16 @@ public class ProductServiceImpl implements ProductService{
 			ids.add(m.getKey());
 			quantities.add(m.getValue());
 		}
-
 		for (Long id : ids) {
-			try {
-				Product checkProduct = productRepo.findById(id).orElseThrow(() -> new NoSuchElementException());
-				if (quantities.get(ids.indexOf(id)) > checkProduct.getQuantity()) {
+			Optional<Product> checkProduct = productRepo.findById(id);
+			Product product = dtos.optionalToProduct(checkProduct);
+			if (checkProduct.isPresent()) {
+				if (quantities.get(ids.indexOf(id)) > checkProduct.get().getQuantity()) {
 					throw new NegativeArgumentException("Quantity Cannot exceed present Stock");
 				}
-				checkProduct.setQuantity(checkProduct.getQuantity() - quantities.get(ids.indexOf(id)));
-
-				productRepo.save(checkProduct);
-			} catch (NoSuchElementException e) {
+				product.setQuantity(checkProduct.get().getQuantity() - quantities.get(ids.indexOf(id)));
+				productRepo.save(product);
+			} else {
 				throw new NoSuchProductFound("Product with this id " + id + " Not found");
 			}
 		}
