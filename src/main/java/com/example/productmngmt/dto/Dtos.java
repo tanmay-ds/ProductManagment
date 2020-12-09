@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.example.productmngmt.entity.Product;
-import com.example.productmngmt.exceptionhandler.NoSuchProductFound;
 
 @Service
 public class Dtos {
@@ -21,9 +20,16 @@ public class Dtos {
 				product.setQuantity(optional.get().getQuantity());
 				return product;
 			}
-			else {
-				throw new NoSuchProductFound("Empty product was passed");
-			}
+			return null;
 		
+	}
+	
+	public Product dtoToProduct(ProductDto productDto) {
+		Product product = new Product();
+		product.setName(productDto.getName());
+		product.setBrand(productDto.getBrand());
+		product.setPrice(productDto.getPrice());
+		product.setDetails(productDto.getDetails());
+		return product;
 	}
 }

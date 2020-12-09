@@ -7,7 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
 @Document(collection = "Product")
 public class Product {
 
@@ -27,6 +26,19 @@ public class Product {
 	private String details;
 	@Min(0)
 	private Long quantity;
+
+	public Product() {
+	}
+
+	public Product(long prodId, @NotNull String name, @NotNull String brand, @NotNull @Min(0) Long price,
+			@NotNull String details, @Min(0) Long quantity) {
+		this.prodId = prodId;
+		this.name = name;
+		this.brand = brand;
+		this.price = price;
+		this.details = details;
+		this.quantity = quantity;
+	}
 
 	public long getProdId() {
 		return prodId;
@@ -83,5 +95,4 @@ public class Product {
 	}
 
 	
-
 }

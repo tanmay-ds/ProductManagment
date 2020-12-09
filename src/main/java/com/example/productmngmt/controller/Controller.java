@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.productmngmt.dto.ProductDto;
 import com.example.productmngmt.entity.Product;
 import com.example.productmngmt.exceptionhandler.ResponseMessage;
 import com.example.productmngmt.service.ProductService;
@@ -32,18 +33,18 @@ public class Controller {
 	ProductService proService;
 
 	@PostMapping("create")
-	public ResponseEntity<List<String>> createProduct(@Valid @RequestBody List<@Valid Product> products) {
-		return ResponseEntity.ok(proService.create(products));
+	public ResponseEntity<List<String>> createProduct(@Valid @RequestBody List<@Valid ProductDto> productsDto) {
+		return ResponseEntity.ok(proService.create(productsDto));
 	}
 
 	@GetMapping("getproduct/{pid}")
-	public ResponseEntity<Product> getProduct(@PathVariable Long pid) {
-		return ResponseEntity.ok(proService.getProduct(pid));
+	public ResponseEntity<Product> getProductById(@PathVariable Long pid) {
+		return ResponseEntity.ok(proService.getProductById(pid));
 	}
 
 	@PutMapping("update/{pid}")
-	public ResponseEntity<Product> updateProduct(@PathVariable Long pid, @RequestBody Product product) {
-		return ResponseEntity.ok(proService.updateProd(pid, product));
+	public ResponseEntity<Product> updateProduct(@PathVariable Long pid, @RequestBody ProductDto productDto) {
+		return ResponseEntity.ok(proService.updateProd(pid, productDto));
 	}
 
 	@GetMapping("getall")

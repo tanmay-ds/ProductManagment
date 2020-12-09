@@ -6,19 +6,20 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.example.productmngmt.dto.ProductDto;
 import com.example.productmngmt.entity.Product;
 
 public interface ProductService {
 
-	public List<String> create(List<Product> products);
+	public List<String> create(List<ProductDto> productsDto);
 	
-	public Product getProduct(Long pid);
+	public Product getProductById(Long pid);
 	
 	public Page<Product> getAll(Pageable pageable);
 	
 	public Page<Product> getAll(String search, Pageable pageable);
 	
-	public Product updateProd(Long pid, Product product);
+	public Product updateProd(Long pid, ProductDto productDto);
 	
 	public Long deleteProd(Long pid);
 	
