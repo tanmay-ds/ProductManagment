@@ -14,6 +14,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.example.productmngmt.constant.Constants;
@@ -50,7 +53,7 @@ class ProductManagementApplicationTests {
 		products.add(product);
 		products.add(new Product(2l, "Mobile Phone", "Samsoong", 45555l, "12 gb ram", 1l));
 
-		productRepo.save(product);
+		productRepo.saveAll(products);
 
 		productDto = new ProductDto("Tv2", "Samsoong", 696666l, "88 Oled inch", 0l);
 	}
@@ -65,10 +68,31 @@ class ProductManagementApplicationTests {
 				+ Constants.ALREADY_EXITS, exception.getMessage());
 
 	}
+	
+	@Test
+	void getAll() {
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<Product> productspage = proService.getAll(pageable);
+		assertEquals(products, productspage.getContent());
+	}
+	
+	@Test 
+	void getAllByPartialSearch() {
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<Product> productspage = proService.getAll("phone", pageable);
+		assertEquals(products, productspage.getContent());
+	}
+	
+	@Test
+	void getAllByPartialSearchNotFound() {
+		Pageable pageable = PageRequest.of(0, 10);
+		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.getAll("tv", pageable));
+		assertEquals(Constants.NO_RESULT_FOUND, exception.getMessage());
+	}
 
 	@Test
 	void getProductById() {
-		assertEquals(product.toString(), proService.getProductById(product.getProdId()).toString());
+		assertEquals(product, proService.getProductById(product.getProdId()));
 	}
 
 	@Test
@@ -79,15 +103,15 @@ class ProductManagementApplicationTests {
 
 	@Test
 	void updateProduct() {
-		assertEquals(new Product(1l, "Tv2", "Samsoong", 696666l, "88 Oled inch", 1l).toString(),
-				proService.updateProd(product.getProdId(), productDto).toString());
+		assertEquals(new Product(1l, "Tv2", "Samsoong", 696666l, "88 Oled inch", 1l),
+				proService.updateProd(product.getProdId(), productDto));
 
 	}
 
 	@Test
 	void updateProductNotFound() {
-		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.updateProd(2l, productDto));
-		assertEquals(Constants.PRODUCT_WITH_ID + 2l + Constants.NOT_FOUND, exception.getMessage());
+		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.updateProd(9999l, productDto));
+		assertEquals(Constants.PRODUCT_WITH_ID + 9999l + Constants.NOT_FOUND, exception.getMessage());
 	}
 
 	@Test
@@ -131,7 +155,7 @@ class ProductManagementApplicationTests {
 
 	@AfterEach
 	void deleteProduct() {
-		productRepo.deleteById(product.getProdId());
+		productRepo.deleteAll();
 	}
 
 }
