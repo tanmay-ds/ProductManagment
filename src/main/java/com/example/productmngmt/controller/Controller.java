@@ -61,8 +61,8 @@ public class Controller {
 
 	@DeleteMapping("delete/{pid}")
 	public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long pid) {
-		return ResponseEntity.ok(new ResponseMessage(
-				new Date(), HttpStatus.OK, "Product with Id : " + proService.deleteProd(pid) + " is deleted"));
+		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK,
+				"Product with Id : " + proService.deleteProd(pid) + " is deleted"));
 	}
 
 	@PostMapping("addStock")
@@ -72,7 +72,6 @@ public class Controller {
 
 	@PostMapping("removeStock")
 	public ResponseEntity<ResponseMessage> removeStock(@RequestBody Map<Long, Long> stockList) {
-		return ResponseEntity.ok(
-				new ResponseMessage(new Date(), HttpStatus.OK, proService.removeStock(stockList)));
+		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK, proService.removeStock(stockList)));
 	}
 }
