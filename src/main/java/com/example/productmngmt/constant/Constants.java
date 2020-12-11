@@ -16,5 +16,6 @@ public class Constants {
 	public static final String CANNOT_EXCEED_QUANTITY = "Quantity Cannot exceed present Stock";
 	public static final String STOCKS_ADDED = "Stocks Added";
 	public static final String STOCKS_UPDATE = "Stocks Updated";
+	
 
 }

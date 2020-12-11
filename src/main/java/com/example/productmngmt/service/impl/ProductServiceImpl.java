@@ -10,21 +10,40 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.productmngmt.constant.Constants;
 import com.example.productmngmt.dto.Dtos;
 import com.example.productmngmt.dto.ProductDto;
 import com.example.productmngmt.entity.Product;
+import com.example.productmngmt.entity.Users;
+import com.example.productmngmt.exceptionhandler.BadCredsException;
 import com.example.productmngmt.exceptionhandler.NegativeArgumentException;
 import com.example.productmngmt.exceptionhandler.NoSuchProductFound;
 import com.example.productmngmt.exceptionhandler.ProductAlreadyExists;
+import com.example.productmngmt.jwt.model.AuthRequest;
+import com.example.productmngmt.jwt.util.JwtUtil;
 import com.example.productmngmt.repo.ProductRepo;
+import com.example.productmngmt.repo.UserRepo;
+import com.example.productmngmt.service.MyUserDetailsService;
 import com.example.productmngmt.service.ProductService;
 import com.example.productmngmt.service.SequenceGenrationService;
 
 @Service
 public class ProductServiceImpl implements ProductService {
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	MyUserDetailsService myUserDetailsService;
+
+	@Autowired
+	JwtUtil jwtUtil;
 
 	@Autowired
 	ProductRepo productRepo;
@@ -37,6 +56,21 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	Dtos dtos;
+
+	@Autowired
+	UserRepo userRepo;
+
+	@Override
+	public String authenticate(AuthRequest authRequest) {
+		try {
+			authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
+		} catch (BadCredentialsException e) {
+			throw new BadCredsException("Incorrect username or password");
+		}
+		final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authRequest.getUsername());
+		return jwtUtil.genrateToken(userDetails);
+	}
 
 	@Override
 	public List<String> create(List<ProductDto> productsDto) {
@@ -55,7 +89,7 @@ public class ProductServiceImpl implements ProductService {
 
 		for (ProductDto productDto : productsDto) {
 			Product product = dtos.dtoToProduct(productDto);
-			product.setProdId(genrationService.generateSequence(Product.SEQUENCE_NAME));
+			product.setProdId(genrationService.generateProductSequence(Product.SEQUENCE_NAME));
 			product.setQuantity(0l);
 			messages.add(Constants.PRODUCT_ADDED_WITH_ID + product.getProdId());
 			saveProducts.add(product);
@@ -140,5 +174,16 @@ public class ProductServiceImpl implements ProductService {
 				throw new NegativeArgumentException(Constants.CANNOT_BE_NEGATIVE);
 			}
 		}
+	}
+
+	@Override
+	public String createUser(List<Users> users) {
+
+		for (Users user : users) {
+			user.setUuid(genrationService.generateUserSequence(Users.SEQUENCE_NAME));
+		}
+		userRepo.saveAll(users);
+
+		return "User Added";
 	}
 }

@@ -21,12 +21,6 @@ public class ProductRepositoryTemplateImpl implements ProductRepositoryTemplate{
 	private MongoTemplate mongoTeamplate;
 
 	@Override
-	public List<Product> findProductByNameIgnoreCase(String productName) {
-		Query query = new Query().addCriteria(Criteria.where("name").regex(Pattern.compile(productName,Pattern.CASE_INSENSITIVE)));
-		return mongoTeamplate.find(query, Product.class);
-		}
-
-	@Override
 	public Page<Product> findByNamePartialSearch(String regex, Pageable pageable) {
 		Query query = new Query().addCriteria(Criteria.where("name").regex(Pattern.compile(regex,Pattern.CASE_INSENSITIVE))).with(pageable);
 		

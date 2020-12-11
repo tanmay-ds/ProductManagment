@@ -18,4 +18,6 @@ public interface ProductRepo extends MongoRepository<Product,Long>, ProductRepos
 
 	Page<Product> findByNamePartialSearch(String regex,Pageable pageable);
 	
+	Page<Product> findByNameRegex(String name,Pageable pageable);
+	
 }

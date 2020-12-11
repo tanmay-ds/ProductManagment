@@ -22,11 +22,19 @@ public class SequenceGenrationService {
 		this.mongoOperations = mongoOperations;
 	}
 
-	public long generateSequence(String seqName) {
+	public long generateProductSequence(String seqName) {
 		Query query = new Query();
 		CustomSequence counter = mongoOperations.findAndModify(query.addCriteria(Criteria.where("_id").is(seqName)),
-				new Update().inc("seq", 1), FindAndModifyOptions.options().returnNew(true).upsert(true),
+				new Update().inc("proSeq", 1), FindAndModifyOptions.options().returnNew(true).upsert(true),
 				CustomSequence.class);
-		return !Objects.isNull(counter) ? counter.getSeq() : 1;
+		return !Objects.isNull(counter) ? counter.getProSeq() : 1;
+	}
+	
+	public long generateUserSequence(String seqName) {
+		Query query = new Query();
+		CustomSequence counter = mongoOperations.findAndModify(query.addCriteria(Criteria.where("_id").is(seqName)),
+				new Update().inc("userSeq", 1), FindAndModifyOptions.options().returnNew(true).upsert(true),
+				CustomSequence.class);
+		return !Objects.isNull(counter) ? counter.getUserSeq() : 1;
 	}
 }

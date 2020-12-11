@@ -116,33 +116,12 @@ public class Product {
 		if (getClass() != obj.getClass())
 			return false;
 		Product other = (Product) obj;
-		if (brand == null) {
-			if (other.brand != null)
+		if (brand == null || details == null || name == null || price == null || quantity == null) {
+			if (other.brand != null || other.details != null || other.name != null || other.price != null ||other.quantity != null || prodId != other.prodId )
 				return false;
-		} else if (!brand.equals(other.brand))
+		} else if (!brand.equals(other.brand)|| !details.equals(other.details) || !name.equals(other.name) || !price.equals(other.price) || !quantity.equals(other.quantity))
 			return false;
-		if (details == null) {
-			if (other.details != null)
-				return false;
-		} else if (!details.equals(other.details))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (price == null) {
-			if (other.price != null)
-				return false;
-		} else if (!price.equals(other.price))
-			return false;
-		if (prodId != other.prodId)
-			return false;
-		if (quantity == null) {
-			if (other.quantity != null)
-				return false;
-		} else if (!quantity.equals(other.quantity))
-			return false;
+		
 		return true;
 	}
 

@@ -1,7 +1,7 @@
 package com.example.productmngmt.dto;
 
 public class ProductDto {
-
+	
 	private String name;
 	private String brand;
 	private Long price;
