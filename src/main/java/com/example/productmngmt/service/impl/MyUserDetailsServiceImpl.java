@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.productmngmt.dto.Dtos;
 import com.example.productmngmt.entity.Users;
+import com.example.productmngmt.exceptionhandler.BadCredsException;
 import com.example.productmngmt.model.MyUserDetails;
 import com.example.productmngmt.repo.UserRepo;
 
@@ -33,24 +34,16 @@ public class MyUserDetailsServiceImpl implements UserDetailsService{
 	
 	@Override
 	public UserDetails loadUserByUsername(String username){
-		Users user = userRepo.findByEmail(username);
-//		try {
-//			user = userRepo.findByEncryptEmail(username,key);
-//		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-//				| BadPaddingException e1) {
-//			e1.printStackTrace();
-//		}
+		Users user = null;
+		try {
+			user = userRepo.findByEncryptEmail(username,key);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+				| BadPaddingException e1) {
+			throw new BadCredsException("Incorrect username or password");
+		}
 		if(user==null) {
 			throw new UsernameNotFoundException("user not found ");
 		}
-//		Users decryptedUser = new Users();
-//		try {
-//			decryptedUser = dtos.decrypt(user);
-//		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-//				| BadPaddingException e) {
-//			e.printStackTrace();
-//		}
-		
 		return new MyUserDetails(user);
 	}
 	

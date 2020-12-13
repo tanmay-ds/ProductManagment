@@ -60,6 +60,7 @@ public class Dtos {
 		user.setLastName(cryptoUtil.encrypt(user.getLastName(), key));
 		user.setPhoneNumber(cryptoUtil.encrypt(user.getPhoneNumber(), key));
 		user.setAddress(cryptoUtil.encrypt(user.getAddress(), key));
+		user.setEmail(cryptoUtil.encrypt(user.getEmail(), key));
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		for (Roles role : user.getRoles()) {
 			role.setRole(cryptoUtil.encrypt(role.getRole(), key));
@@ -73,6 +74,7 @@ public class Dtos {
 		user.setLastName(cryptoUtil.decrypt(user.getLastName(), key));
 		user.setPhoneNumber(cryptoUtil.decrypt(user.getPhoneNumber(), key));
 		user.setAddress(cryptoUtil.decrypt(user.getAddress(), key));
+		user.setEmail(cryptoUtil.decrypt(user.getEmail(), key));
 		for (Roles role : user.getRoles()) {
 			role.setRole(cryptoUtil.decrypt(role.getRole(), key));
 		}
