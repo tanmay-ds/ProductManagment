@@ -1,10 +1,16 @@
 package com.example.productmngmt.service.impl;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,9 +35,9 @@ import com.example.productmngmt.jwt.model.AuthRequest;
 import com.example.productmngmt.jwt.util.JwtUtil;
 import com.example.productmngmt.repo.ProductRepo;
 import com.example.productmngmt.repo.UserRepo;
-import com.example.productmngmt.service.MyUserDetailsService;
 import com.example.productmngmt.service.ProductService;
 import com.example.productmngmt.service.SequenceGenrationService;
+import com.example.productmngmt.util.CryptoUtil;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -40,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
 	private AuthenticationManager authenticationManager;
 
 	@Autowired
-	MyUserDetailsService myUserDetailsService;
+	MyUserDetailsServiceImpl myUserDetailsService;
 
 	@Autowired
 	JwtUtil jwtUtil;
@@ -60,6 +66,9 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	UserRepo userRepo;
 
+	@Autowired
+	CryptoUtil cryptoUtil;
+	
 	@Override
 	public String authenticate(AuthRequest authRequest) {
 		try {
@@ -177,13 +186,16 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public String createUser(List<Users> users) {
-
-		for (Users user : users) {
-			user.setUuid(genrationService.generateUserSequence(Users.SEQUENCE_NAME));
+	public String createUser(List<Users> users) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		List<Users> encryptedUsers = new ArrayList<>();
+		for(Users user: users) {
+			Users encrypteduser = dtos.encrypt(user);
+			encrypteduser.setUuid(genrationService.generateUserSequence(Users.SEQUENCE_NAME));
+			encryptedUsers.add(encrypteduser);
 		}
-		userRepo.saveAll(users);
-
-		return "User Added";
+		
+		userRepo.saveAll(encryptedUsers);
+		return Constants.USER_ADDED;
 	}
+
 }

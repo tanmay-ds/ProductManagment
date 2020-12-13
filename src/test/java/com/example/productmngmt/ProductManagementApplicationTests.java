@@ -3,16 +3,23 @@ package com.example.productmngmt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +34,7 @@ import com.example.productmngmt.exceptionhandler.NoSuchProductFound;
 import com.example.productmngmt.exceptionhandler.ProductAlreadyExists;
 import com.example.productmngmt.repo.ProductRepo;
 import com.example.productmngmt.service.ProductService;
+import com.example.productmngmt.util.CryptoUtil;
 
 @SpringBootTest
 @ActiveProfiles(profiles = "local")
@@ -38,12 +46,18 @@ class ProductManagementApplicationTests {
 	@Autowired
 	ProductRepo productRepo;
 
+	@Autowired
+	CryptoUtil cryptoUtil;
+	
 	List<Product> products = new ArrayList<>();
 
 	Map<Long, Long> stockList = new LinkedHashMap<>();
 
 	Product product = null;
 	ProductDto productDto = null;
+	
+	@Value("${key}")
+	private String key;
 
 	@BeforeEach
 	void initProduct() {
@@ -68,21 +82,21 @@ class ProductManagementApplicationTests {
 				+ Constants.ALREADY_EXITS, exception.getMessage());
 
 	}
-	
+
 	@Test
 	void getAll() {
 		Pageable pageable = PageRequest.of(0, 10);
 		Page<Product> productspage = proService.getAll(pageable);
 		assertEquals(products, productspage.getContent());
 	}
-	
-	@Test 
+
+	@Test
 	void getAllByPartialSearch() {
 		Pageable pageable = PageRequest.of(0, 10);
 		Page<Product> productspage = proService.getAll("phone", pageable);
 		assertEquals(products, productspage.getContent());
 	}
-	
+
 	@Test
 	void getAllByPartialSearchNotFound() {
 		Pageable pageable = PageRequest.of(0, 10);
@@ -143,7 +157,10 @@ class ProductManagementApplicationTests {
 	}
 
 	@Test
-	void deleteProductById() {
+	void deleteProductById() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		String encrypted = cryptoUtil.encrypt("Tanmay", key);
+		System.out.println(encrypted);
+		System.out.println(cryptoUtil.decrypt(encrypted, key));
 		assertEquals(product.getProdId(), proService.deleteProd(product.getProdId()));
 	}
 

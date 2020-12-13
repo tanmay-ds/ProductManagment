@@ -1,7 +1,13 @@
 package com.example.productmngmt.service;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,8 +20,8 @@ import com.example.productmngmt.jwt.model.AuthRequest;
 public interface ProductService {
 
 	public List<String> create(List<ProductDto> productsDto);
-	
-	public String createUser(List<Users> users);
+
+	public String createUser(List<Users> users) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException;
 
 	public Product getProductById(Long pid);
 

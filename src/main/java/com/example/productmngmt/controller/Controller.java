@@ -1,9 +1,14 @@
 package com.example.productmngmt.controller;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +45,7 @@ public class Controller {
 	@PostMapping("authenticate")
 	public ResponseEntity<ResponseMessage> authenticate(@RequestBody AuthRequest authRequest) {
 		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK,
-				"Bearer Token : " + proService.authenticate(authRequest)));
+				"Token : " + proService.authenticate(authRequest)));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
@@ -49,9 +54,9 @@ public class Controller {
 		return ResponseEntity.ok(proService.create(productsDto));
 	}
 
-	@PreAuthorize("hasAnyRole('ADMIN')")
+//	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("createuser")
-	public ResponseEntity<String> createUser(@RequestBody List<@Valid Users> users) {
+	public ResponseEntity<String> createUser(@RequestBody List<@Valid Users> users) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		return ResponseEntity.ok(proService.createUser(users));
 	}
 
