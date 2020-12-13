@@ -28,7 +28,7 @@ public class UserRepositoryTemplateImpl implements UserRepositoryTemplate{
 	public Users findByEncryptEmail(String email,String key) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		Query query = new Query().addCriteria(Criteria.where("email").is(cryptoUtil.encrypt(email, key)));
 		
-		return mongoTeamplate.findOne(query, Users.class);
+		return mongoTeamplate.findOne(query, Users.class,"users");
 	}
 
 }

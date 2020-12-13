@@ -63,12 +63,9 @@ class ProductManagementApplicationTests {
 	void initProduct() {
 
 		product = new Product(1l, "Earphones", "Samsoong", 10000l, "Wireless", 1l);
-
 		products.add(product);
 		products.add(new Product(2l, "Mobile Phone", "Samsoong", 45555l, "12 gb ram", 1l));
-
 		productRepo.saveAll(products);
-
 		productDto = new ProductDto("Tv2", "Samsoong", 696666l, "88 Oled inch", 0l);
 	}
 

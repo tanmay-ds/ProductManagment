@@ -21,31 +21,31 @@ import com.example.productmngmt.model.MyUserDetails;
 import com.example.productmngmt.repo.UserRepo;
 
 @Service
-public class MyUserDetailsServiceImpl implements UserDetailsService{
+public class MyUserDetailsServiceImpl implements UserDetailsService {
 
 	@Autowired
 	UserRepo userRepo;
-	
+
 	@Autowired
 	Dtos dtos;
-	
+
 	@Value("${key}")
 	private String key;
-	
+
 	@Override
-	public UserDetails loadUserByUsername(String username){
-		Users user = null;
+	public UserDetails loadUserByUsername(String username) {
+		Users decryptedUser = null;
 		try {
-			user = userRepo.findByEncryptEmail(username,key);
+			decryptedUser = dtos.decrypt(userRepo.findByEncryptEmail(username, key));
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException e1) {
 			throw new BadCredsException("Incorrect username or password");
 		}
-		if(user==null) {
+		if (decryptedUser == null) {
 			throw new UsernameNotFoundException("user not found ");
 		}
-		return new MyUserDetails(user);
+
+		return new MyUserDetails(decryptedUser);
 	}
-	
 
 }

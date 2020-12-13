@@ -68,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	CryptoUtil cryptoUtil;
-	
+
 	@Override
 	public String authenticate(AuthRequest authRequest) {
 		try {
@@ -186,14 +186,15 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public String createUser(List<Users> users) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	public String createUser(List<Users> users) throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		List<Users> encryptedUsers = new ArrayList<>();
-		for(Users user: users) {
+		for (Users user : users) {
 			Users encrypteduser = dtos.encrypt(user);
 			encrypteduser.setUuid(genrationService.generateUserSequence(Users.SEQUENCE_NAME));
 			encryptedUsers.add(encrypteduser);
 		}
-		
+
 		userRepo.saveAll(encryptedUsers);
 		return Constants.USER_ADDED;
 	}

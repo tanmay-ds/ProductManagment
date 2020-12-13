@@ -54,7 +54,7 @@ public class Controller {
 		return ResponseEntity.ok(proService.create(productsDto));
 	}
 
-//	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("createuser")
 	public ResponseEntity<String> createUser(@RequestBody List<@Valid Users> users) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		return ResponseEntity.ok(proService.createUser(users));

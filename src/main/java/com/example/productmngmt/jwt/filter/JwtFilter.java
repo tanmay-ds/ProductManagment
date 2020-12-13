@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.productmngmt.jwt.util.JwtUtil;
 import com.example.productmngmt.service.impl.MyUserDetailsServiceImpl;
+import com.example.productmngmt.util.CryptoUtil;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -26,6 +27,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	@Autowired
 	JwtUtil jwtUtil;
+
+	@Autowired
+	CryptoUtil cryptoUtil;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
