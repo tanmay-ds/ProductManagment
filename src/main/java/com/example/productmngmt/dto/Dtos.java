@@ -2,6 +2,8 @@ package com.example.productmngmt.dto;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.crypto.BadPaddingException;
@@ -56,29 +58,40 @@ public class Dtos {
 
 	public Users encrypt(Users user) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException {
-		user.setFirstName(cryptoUtil.encrypt(user.getFirstName(), key));
-		user.setLastName(cryptoUtil.encrypt(user.getLastName(), key));
-		user.setPhoneNumber(cryptoUtil.encrypt(user.getPhoneNumber(), key));
-		user.setAddress(cryptoUtil.encrypt(user.getAddress(), key));
-		user.setEmail(cryptoUtil.encrypt(user.getEmail(), key));
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		Users encryptedUsers = new Users();
+		encryptedUsers.setFirstName(cryptoUtil.encrypt(user.getFirstName(), key));
+		encryptedUsers.setLastName(cryptoUtil.encrypt(user.getLastName(), key));
+		encryptedUsers.setPhoneNumber(cryptoUtil.encrypt(user.getPhoneNumber(), key));
+		encryptedUsers.setAddress(cryptoUtil.encrypt(user.getAddress(), key));
+		encryptedUsers.setEmail(cryptoUtil.encrypt(user.getEmail(), key));
+		encryptedUsers.setPassword(passwordEncoder.encode(user.getPassword()));
+		List<Roles> roles = new ArrayList<>();
 		for (Roles role : user.getRoles()) {
-			role.setRole(cryptoUtil.encrypt(role.getRole(), key));
+			Roles newRoles = new Roles();
+			newRoles.setRole(cryptoUtil.encrypt(role.getRole(), key));
+			roles.add(newRoles);
 		}
-		return user;
+		encryptedUsers.setRoles(roles);
+		return encryptedUsers;
 	}
 
 	public Users decrypt(Users user) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException {
-		user.setFirstName(cryptoUtil.decrypt(user.getFirstName(), key));
-		user.setLastName(cryptoUtil.decrypt(user.getLastName(), key));
-		user.setPhoneNumber(cryptoUtil.decrypt(user.getPhoneNumber(), key));
-		user.setAddress(cryptoUtil.decrypt(user.getAddress(), key));
-		user.setEmail(cryptoUtil.decrypt(user.getEmail(), key));
+		Users decryptedUsers = new Users();
+		decryptedUsers.setFirstName(cryptoUtil.decrypt(user.getFirstName(), key));
+		decryptedUsers.setLastName(cryptoUtil.decrypt(user.getLastName(), key));
+		decryptedUsers.setPhoneNumber(cryptoUtil.decrypt(user.getPhoneNumber(), key));
+		decryptedUsers.setAddress(cryptoUtil.decrypt(user.getAddress(), key));
+		decryptedUsers.setEmail(cryptoUtil.decrypt(user.getEmail(), key));
+		decryptedUsers.setPassword(user.getPassword());
+		List<Roles> roles = new ArrayList<>();
 		for (Roles role : user.getRoles()) {
-			role.setRole(cryptoUtil.decrypt(role.getRole(), key));
+			Roles newRoles = new Roles();
+			newRoles.setRole(cryptoUtil.decrypt(role.getRole(), key));
+			roles.add(newRoles);
 		}
-		return user;
+		decryptedUsers.setRoles(roles);
+		return decryptedUsers;
 	}
 
 }

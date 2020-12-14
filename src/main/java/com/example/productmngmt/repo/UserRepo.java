@@ -12,4 +12,6 @@ public interface UserRepo extends MongoRepository<Users, Long>,UserRepositoryTem
 	
 	Users findByEmail(String email);
 
+	Users findByFirstName(String name);
+
 }

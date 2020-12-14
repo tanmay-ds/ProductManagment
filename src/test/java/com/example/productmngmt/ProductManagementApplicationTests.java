@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,15 +25,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.example.productmngmt.constant.Constants;
+import com.example.productmngmt.dto.Dtos;
 import com.example.productmngmt.dto.ProductDto;
 import com.example.productmngmt.entity.Product;
+import com.example.productmngmt.entity.Roles;
+import com.example.productmngmt.entity.Users;
 import com.example.productmngmt.exceptionhandler.NegativeArgumentException;
 import com.example.productmngmt.exceptionhandler.NoSuchProductFound;
 import com.example.productmngmt.exceptionhandler.ProductAlreadyExists;
 import com.example.productmngmt.repo.ProductRepo;
+import com.example.productmngmt.repo.UserRepo;
 import com.example.productmngmt.service.ProductService;
 import com.example.productmngmt.util.CryptoUtil;
 
@@ -49,24 +55,39 @@ class ProductManagementApplicationTests {
 	@Autowired
 	CryptoUtil cryptoUtil;
 	
+	@Autowired
+	UserRepo userRepo;
+
+	@Autowired
+	Dtos dtos;
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
+	
 	List<Product> products = new ArrayList<>();
 
 	Map<Long, Long> stockList = new LinkedHashMap<>();
 
 	Product product = null;
 	ProductDto productDto = null;
+	Users user = null;
+	List<Roles> roles = new ArrayList<>();
 	
 	@Value("${key}")
 	private String key;
 
 	@BeforeEach
-	void initProduct() {
+	void init() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 
 		product = new Product(1l, "Earphones", "Samsoong", 10000l, "Wireless", 1l);
 		products.add(product);
 		products.add(new Product(2l, "Mobile Phone", "Samsoong", 45555l, "12 gb ram", 1l));
 		productRepo.saveAll(products);
 		productDto = new ProductDto("Tv2", "Samsoong", 696666l, "88 Oled inch", 0l);
+		roles.add(new Roles("ROLE_ADMIN"));
+		user = new Users("tanmay", "shakya", "abc@z.com", "8877996655", "gimb", "admin",roles);
+		proService.createUser(Collections.singletonList(user));
 	}
 
 	@Test
@@ -166,10 +187,27 @@ class ProductManagementApplicationTests {
 		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.deleteProd(10l));
 		assertEquals(Constants.PRODUCT_WITH_ID + 10l + Constants.NOT_FOUND, exception.getMessage());
 	}
+	
+	@Test
+	void createUser() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException {
+		assertEquals(Constants.USER_ADDED, proService.createUser(Collections.singletonList(new Users("hi", "hello", "xyz@a.com", "8877996655", "gimb", "admin",
+				Collections.singletonList(new Roles("ROLE_ADMIN"))))));
+
+	}
+	
+	@Test
+	void validateUserDetails() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		Users decryptedUser = dtos.decrypt(userRepo.findByFirstName(dtos.encrypt(user).getFirstName()));
+		if(passwordEncoder.matches(user.getPassword(), decryptedUser.getPassword()))
+			decryptedUser.setPassword(user.getPassword());
+		assertEquals(decryptedUser, user);
+	}
 
 	@AfterEach
-	void deleteProduct() {
+	void delete() {
 		productRepo.deleteAll();
+		userRepo.deleteAll();
 	}
 
 }

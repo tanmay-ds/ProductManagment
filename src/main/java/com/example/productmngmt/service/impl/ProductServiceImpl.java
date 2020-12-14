@@ -194,7 +194,6 @@ public class ProductServiceImpl implements ProductService {
 			encrypteduser.setUuid(genrationService.generateUserSequence(Users.SEQUENCE_NAME));
 			encryptedUsers.add(encrypteduser);
 		}
-
 		userRepo.saveAll(encryptedUsers);
 		return Constants.USER_ADDED;
 	}
