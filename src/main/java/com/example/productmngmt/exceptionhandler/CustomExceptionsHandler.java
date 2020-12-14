@@ -5,12 +5,12 @@ import java.util.Date;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(NoSuchProductFound.class)
@@ -32,6 +32,11 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 	public final ResponseEntity<ResponseMessage> badCred(BadCredsException e, WebRequest request) {
 		return new ResponseEntity<>(new ResponseMessage(new Date(), HttpStatus.UNAUTHORIZED, e.getLocalizedMessage()),
 				new HttpHeaders(), HttpStatus.UNAUTHORIZED);
+	}
+	
+	@ExceptionHandler(ExpiredJwtTokenException.class)
+	public final ResponseEntity<ResponseMessage> expiredJwtToken(ExpiredJwtTokenException e, WebRequest request) {
+		return internalServerError(e.getLocalizedMessage());
 	}
 
 	private ResponseEntity<ResponseMessage> internalServerError(String message) {

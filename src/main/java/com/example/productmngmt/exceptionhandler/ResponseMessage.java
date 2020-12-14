@@ -10,6 +10,11 @@ public class ResponseMessage {
 	private HttpStatus status;
 	private String message;
 
+	
+	
+	public ResponseMessage() {
+	}
+
 	public ResponseMessage(Date timestamp, HttpStatus status,String message) {
 		super();
 		this.timestamp = timestamp;
