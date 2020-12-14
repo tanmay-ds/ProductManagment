@@ -40,7 +40,6 @@ import com.example.productmngmt.exceptionhandler.ProductAlreadyExists;
 import com.example.productmngmt.repo.ProductRepo;
 import com.example.productmngmt.repo.UserRepo;
 import com.example.productmngmt.service.ProductService;
-import com.example.productmngmt.util.CryptoUtil;
 
 @SpringBootTest
 @ActiveProfiles(profiles = "local")
@@ -53,18 +52,14 @@ class ProductManagementApplicationTests {
 	ProductRepo productRepo;
 
 	@Autowired
-	CryptoUtil cryptoUtil;
-	
-	@Autowired
 	UserRepo userRepo;
 
 	@Autowired
 	Dtos dtos;
-	
+
 	@Autowired
 	PasswordEncoder passwordEncoder;
 
-	
 	List<Product> products = new ArrayList<>();
 
 	Map<Long, Long> stockList = new LinkedHashMap<>();
@@ -73,12 +68,13 @@ class ProductManagementApplicationTests {
 	ProductDto productDto = null;
 	Users user = null;
 	List<Roles> roles = new ArrayList<>();
-	
+
 	@Value("${key}")
 	private String key;
 
 	@BeforeEach
-	void init() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	void init() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
+			BadPaddingException {
 
 		product = new Product(1l, "Earphones", "Samsoong", 10000l, "Wireless", 1l);
 		products.add(product);
@@ -86,7 +82,7 @@ class ProductManagementApplicationTests {
 		productRepo.saveAll(products);
 		productDto = new ProductDto("Tv2", "Samsoong", 696666l, "88 Oled inch", 0l);
 		roles.add(new Roles("ROLE_ADMIN"));
-		user = new Users("tanmay", "shakya", "abc@z.com", "8877996655", "gimb", "admin",roles);
+		user = new Users("tanmay", "shakya", "abc@z.com", "8877996655", "gimb", "admin", roles);
 		proService.createUser(Collections.singletonList(user));
 	}
 
@@ -175,10 +171,8 @@ class ProductManagementApplicationTests {
 	}
 
 	@Test
-	void deleteProductById() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		String encrypted = cryptoUtil.encrypt("Tanmay", key);
-		System.out.println(encrypted);
-		System.out.println(cryptoUtil.decrypt(encrypted, key));
+	void deleteProductById() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException {
 		assertEquals(product.getProdId(), proService.deleteProd(product.getProdId()));
 	}
 
@@ -187,19 +181,20 @@ class ProductManagementApplicationTests {
 		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.deleteProd(10l));
 		assertEquals(Constants.PRODUCT_WITH_ID + 10l + Constants.NOT_FOUND, exception.getMessage());
 	}
-	
+
 	@Test
 	void createUser() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException {
-		assertEquals(Constants.USER_ADDED, proService.createUser(Collections.singletonList(new Users("hi", "hello", "xyz@a.com", "8877996655", "gimb", "admin",
-				Collections.singletonList(new Roles("ROLE_ADMIN"))))));
+		assertEquals(Constants.USER_ADDED, proService.createUser(Collections.singletonList(new Users("hi", "hello",
+				"xyz@a.com", "8877996655", "gimb", "admin", Collections.singletonList(new Roles("ROLE_ADMIN"))))));
 
 	}
-	
+
 	@Test
-	void validateUserDetails() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	void validateUserDetails() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException {
 		Users decryptedUser = dtos.decrypt(userRepo.findByFirstName(dtos.encrypt(user).getFirstName()));
-		if(passwordEncoder.matches(user.getPassword(), decryptedUser.getPassword()))
+		if (passwordEncoder.matches(user.getPassword(), decryptedUser.getPassword()))
 			decryptedUser.setPassword(user.getPassword());
 		assertEquals(decryptedUser, user);
 	}
