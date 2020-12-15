@@ -66,4 +66,12 @@ public class MyUserDetails implements UserDetails {
 		return true;
 	}
 
+	public Users getUser() {
+		return user;
+	}
+
+	public void setUser(Users user) {
+		this.user = user;
+	}
+
 }

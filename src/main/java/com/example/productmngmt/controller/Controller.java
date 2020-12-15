@@ -31,7 +31,7 @@ import com.example.productmngmt.dto.ProductDto;
 import com.example.productmngmt.entity.Product;
 import com.example.productmngmt.entity.Users;
 import com.example.productmngmt.exceptionhandler.ResponseMessage;
-import com.example.productmngmt.jwt.model.AuthRequest;
+import com.example.productmngmt.security.jwt.AuthRequest;
 import com.example.productmngmt.service.ProductService;
 
 @Validated
@@ -103,5 +103,12 @@ public class Controller {
 	@PostMapping("removeStock")
 	public ResponseEntity<ResponseMessage> removeStock(@RequestBody Map<Long, Long> stockList) {
 		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK, proService.removeStock(stockList)));
+	}
+	
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	@GetMapping("/logout")
+	public ResponseEntity<ResponseMessage> logout(){
+		return ResponseEntity.ok(proService.logoutUser());
+		
 	}
 }

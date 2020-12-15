@@ -1,21 +1,28 @@
-package com.example.productmngmt.jwt.util;
+package com.example.productmngmt.security.jwt;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.example.productmngmt.repo.BlackListedTokenRepo;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
-public class JwtUtil {
+public class JwtTokenProvider {
 
+	@Autowired
+	BlackListedTokenRepo blacklistedTokenRepo;
+	
 	@Value("${secretkey}")
 	private String secretKey;
 
@@ -56,6 +63,12 @@ public class JwtUtil {
 
 	private Boolean isTokenExpired(String token) {
 		return extractExpiration(token).before(new Date());
+	}
+
+	public void checkIfUserAccessTokenBlackListed(String jwt) {
+		if(!jwt.isEmpty() && !blacklistedTokenRepo.findByAccesToken(jwt).isEmpty()) {
+    		throw new AccessDeniedException("Invalid token");
+		} 
 	}
 
 }

@@ -15,7 +15,8 @@ import org.springframework.data.domain.Pageable;
 import com.example.productmngmt.dto.ProductDto;
 import com.example.productmngmt.entity.Product;
 import com.example.productmngmt.entity.Users;
-import com.example.productmngmt.jwt.model.AuthRequest;
+import com.example.productmngmt.exceptionhandler.ResponseMessage;
+import com.example.productmngmt.security.jwt.AuthRequest;
 
 public interface ProductService {
 
@@ -38,5 +39,7 @@ public interface ProductService {
 	public String removeStock(Map<Long, Long> stockList);
 
 	public String authenticate(AuthRequest authRequest);
+
+	public ResponseMessage logoutUser();
 
 }

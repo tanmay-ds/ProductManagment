@@ -3,6 +3,7 @@ package com.example.productmngmt.service.impl;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,16 +27,20 @@ import org.springframework.stereotype.Service;
 import com.example.productmngmt.constant.Constants;
 import com.example.productmngmt.dto.Dtos;
 import com.example.productmngmt.dto.ProductDto;
+import com.example.productmngmt.entity.BlackListedToken;
 import com.example.productmngmt.entity.Product;
 import com.example.productmngmt.entity.Users;
 import com.example.productmngmt.exceptionhandler.BadCredsException;
 import com.example.productmngmt.exceptionhandler.NegativeArgumentException;
 import com.example.productmngmt.exceptionhandler.NoSuchProductFound;
 import com.example.productmngmt.exceptionhandler.ProductAlreadyExists;
-import com.example.productmngmt.jwt.model.AuthRequest;
-import com.example.productmngmt.jwt.util.JwtUtil;
+import com.example.productmngmt.exceptionhandler.ResponseMessage;
+import com.example.productmngmt.repo.BlackListedTokenRepo;
 import com.example.productmngmt.repo.ProductRepo;
 import com.example.productmngmt.repo.UserRepo;
+import com.example.productmngmt.security.jwt.AuthRequest;
+import com.example.productmngmt.security.jwt.JwtTokenProvider;
+import com.example.productmngmt.security.jwt.JwtUtil;
 import com.example.productmngmt.service.ProductService;
 import com.example.productmngmt.service.SequenceGenrationService;
 import com.example.productmngmt.util.CryptoUtil;
@@ -49,10 +55,13 @@ public class ProductServiceImpl implements ProductService {
 	MyUserDetailsServiceImpl myUserDetailsService;
 
 	@Autowired
-	JwtUtil jwtUtil;
+	JwtTokenProvider jwtUtil;
 
 	@Autowired
 	ProductRepo productRepo;
+	
+	@Autowired
+	BlackListedTokenRepo blackListedTokenRepo;
 
 	@Autowired
 	SequenceGenrationService genrationService;
@@ -68,7 +77,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	CryptoUtil cryptoUtil;
-
+	
 	@Override
 	public String authenticate(AuthRequest authRequest) {
 		try {
@@ -196,6 +205,22 @@ public class ProductServiceImpl implements ProductService {
 		}
 		userRepo.saveAll(encryptedUsers);
 		return Constants.USER_ADDED;
+	}
+
+	@Override
+	public ResponseMessage logoutUser() {
+		
+		doTokenBlackList();
+		return new ResponseMessage(new Date(), HttpStatus.OK, "logout sucess");
+	}
+
+	private void doTokenBlackList() {
+		Long uuid = JwtUtil.getUuidFromToken();
+		BlackListedToken blackListedToken = new BlackListedToken();
+		blackListedToken.setId(genrationService.generateBlackListSequence(BlackListedToken.SEQUENCE_NAME));
+		blackListedToken.setUuid(uuid);
+		blackListedToken.setAccesToken(JwtUtil.getToken());
+		blackListedTokenRepo.save(blackListedToken);		
 	}
 
 }

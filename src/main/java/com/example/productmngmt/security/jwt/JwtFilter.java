@@ -1,4 +1,4 @@
-package com.example.productmngmt.jwt.filter;
+package com.example.productmngmt.security.jwt;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.productmngmt.exceptionhandler.ResponseMessage;
-import com.example.productmngmt.jwt.util.JwtUtil;
 import com.example.productmngmt.service.impl.MyUserDetailsServiceImpl;
 import com.example.productmngmt.util.CryptoUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	MyUserDetailsServiceImpl myUserDetailsService;
 
 	@Autowired
-	JwtUtil jwtUtil;
+	JwtTokenProvider jwtTokenProvider;
 
 	@Autowired
 	CryptoUtil cryptoUtil;
@@ -48,13 +48,15 @@ public class JwtFilter extends OncePerRequestFilter {
 		try {
 			if (authorizationHeader != null) {
 				jwt = authorizationHeader;
-				username = jwtUtil.extractUsername(jwt);
+				username = jwtTokenProvider.extractUsername(jwt);
 			}
 
 			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 				UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
+				JwtUtil.setToken(jwt);
+				jwtTokenProvider.checkIfUserAccessTokenBlackListed(jwt);
 
-				if (Boolean.TRUE.equals(jwtUtil.validateToken(jwt, userDetails))) {
+				if (Boolean.TRUE.equals(jwtTokenProvider.validateToken(jwt, userDetails))) {
 					UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
 							userDetails, null, userDetails.getAuthorities());
 					authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -72,7 +74,16 @@ public class JwtFilter extends OncePerRequestFilter {
 			ResponseMessage responseMessage = new ResponseMessage(new Date(), HttpStatus.UNAUTHORIZED, "Token Expired");
 			out.print(mapper.writeValueAsString(responseMessage));
 			out.flush();
-
+		}
+		catch (AccessDeniedException e) {
+			PrintWriter out = response.getWriter();
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			ObjectMapper mapper = new ObjectMapper();
+			ResponseMessage responseMessage = new ResponseMessage(new Date(), HttpStatus.UNAUTHORIZED, "Token Invalid");
+			out.print(mapper.writeValueAsString(responseMessage));
+			out.flush();
 		}
 
 	}

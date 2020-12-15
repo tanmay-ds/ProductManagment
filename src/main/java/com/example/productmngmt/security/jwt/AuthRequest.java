@@ -1,4 +1,4 @@
-package com.example.productmngmt.jwt.model;
+package com.example.productmngmt.security.jwt;
 
 import java.io.Serializable;
 
