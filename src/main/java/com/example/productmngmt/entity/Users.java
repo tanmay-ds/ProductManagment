@@ -22,6 +22,7 @@ public class Users implements Serializable {
 	public static final String SEQUENCE_NAME = "user_sequence";
 
 	@Id
+	private String id;
 	private Long uuid;
 	@NotNull
 	private String firstName;
@@ -42,8 +43,10 @@ public class Users implements Serializable {
 	public Users() {
 	}
 
-	public Users(@NotNull String firstName, @NotNull String lastName, @NotNull String email,
+	public Users(Long uuid, @NotNull String firstName, @NotNull String lastName, @NotNull String email,
 			@NotNull String phoneNumber, @NotNull String address, @NotNull String password, List<Roles> roles) {
+		super();
+		this.uuid = uuid;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
@@ -141,11 +144,10 @@ public class Users implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Users other = (Users) obj;
-		
-		
-		return address.equals(other.address) && email.equals(other.email) && 
-				firstName.equals(other.firstName) && lastName.equals(other.lastName) &&  
-				password.equals(other.password) && phoneNumber.equals(other.phoneNumber) && roles.equals(other.roles);
+
+		return address.equals(other.address) && email.equals(other.email) && firstName.equals(other.firstName)
+				&& lastName.equals(other.lastName) && password.equals(other.password)
+				&& phoneNumber.equals(other.phoneNumber) && roles.equals(other.roles);
 	}
 
 }

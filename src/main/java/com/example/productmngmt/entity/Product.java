@@ -14,7 +14,9 @@ public class Product {
 	public static final String SEQUENCE_NAME = "product_sequence";
 
 	@Id
-	private long prodId;
+	private String id;
+
+	private Long prodId;
 	@NotNull
 	private String name;
 	@NotNull
@@ -40,11 +42,11 @@ public class Product {
 		this.quantity = quantity;
 	}
 
-	public long getProdId() {
+	public Long getProdId() {
 		return prodId;
 	}
 
-	public void setProdId(long prodId) {
+	public void setProdId(Long prodId) {
 		this.prodId = prodId;
 	}
 
@@ -117,13 +119,14 @@ public class Product {
 			return false;
 		Product other = (Product) obj;
 		if (brand == null || details == null || name == null || price == null || quantity == null) {
-			if (other.brand != null || other.details != null || other.name != null || other.price != null ||other.quantity != null || prodId != other.prodId )
+			if (other.brand != null || other.details != null || other.name != null || other.price != null
+					|| other.quantity != null || prodId != other.prodId)
 				return false;
-		} else if (!brand.equals(other.brand)|| !details.equals(other.details) || !name.equals(other.name) || !price.equals(other.price) || !quantity.equals(other.quantity))
+		} else if (!brand.equals(other.brand) || !details.equals(other.details) || !name.equals(other.name)
+				|| !price.equals(other.price) || !quantity.equals(other.quantity))
 			return false;
-		
+
 		return true;
 	}
 
-	
 }
