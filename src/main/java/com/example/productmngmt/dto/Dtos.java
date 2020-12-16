@@ -78,6 +78,7 @@ public class Dtos {
 	public Users decrypt(Users user) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException {
 		Users decryptedUsers = new Users();
+		decryptedUsers.setUuid(user.getUuid());
 		decryptedUsers.setFirstName(cryptoUtil.decrypt(user.getFirstName(), key));
 		decryptedUsers.setLastName(cryptoUtil.decrypt(user.getLastName(), key));
 		decryptedUsers.setPhoneNumber(cryptoUtil.decrypt(user.getPhoneNumber(), key));
