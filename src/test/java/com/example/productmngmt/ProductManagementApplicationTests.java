@@ -40,6 +40,7 @@ import com.example.productmngmt.exceptionhandler.ProductAlreadyExists;
 import com.example.productmngmt.repo.ProductRepo;
 import com.example.productmngmt.repo.UserRepo;
 import com.example.productmngmt.service.ProductService;
+import com.example.productmngmt.service.SequenceGenrationService;
 
 @SpringBootTest
 @ActiveProfiles(profiles = "local")
@@ -59,6 +60,9 @@ class ProductManagementApplicationTests {
 
 	@Autowired
 	PasswordEncoder passwordEncoder;
+	
+	@Autowired 
+	SequenceGenrationService genrationService;
 
 	List<Product> products = new ArrayList<>();
 
@@ -82,7 +86,7 @@ class ProductManagementApplicationTests {
 		productRepo.saveAll(products);
 		productDto = new ProductDto("Tv2", "Samsoong", 696666l, "88 Oled inch", 0l);
 		roles.add(new Roles("ROLE_ADMIN"));
-		user = new Users("tanmay", "shakya", "abc@z.com", "8877996655", "gimb", "admin", roles);
+		user = new Users(genrationService.generateUserSequence(Users.SEQUENCE_NAME),"tanmay", "shakya", "abc@z.com", "8877996655", "gimb", "admin", roles);
 		proService.createUser(Collections.singletonList(user));
 	}
 
@@ -185,7 +189,7 @@ class ProductManagementApplicationTests {
 	@Test
 	void createUser() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException {
-		assertEquals(Constants.USER_ADDED, proService.createUser(Collections.singletonList(new Users("hi", "hello",
+		assertEquals(Constants.USER_ADDED, proService.createUser(Collections.singletonList(new Users(genrationService.generateUserSequence(Users.SEQUENCE_NAME),"hi", "hello",
 				"xyz@a.com", "8877996655", "gimb", "admin", Collections.singletonList(new Roles("ROLE_ADMIN"))))));
 
 	}
