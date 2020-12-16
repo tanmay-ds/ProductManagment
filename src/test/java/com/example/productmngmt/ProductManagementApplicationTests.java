@@ -86,7 +86,7 @@ class ProductManagementApplicationTests {
 		productRepo.saveAll(products);
 		productDto = new ProductDto("Tv2", "Samsoong", 696666l, "88 Oled inch", 0l);
 		roles.add(new Roles("ROLE_ADMIN"));
-		user = new Users(genrationService.generateUserSequence(Users.SEQUENCE_NAME),"tanmay", "shakya", "abc@z.com", "8877996655", "gimb", "admin", roles);
+		user = new Users(genrationService.generateUserSequence(Users.SEQUENCE_NAME),"tanmay", "shakya", "abc@z.com", "8877996655", "gimb", roles);
 		proService.createUser(Collections.singletonList(user));
 	}
 
@@ -190,7 +190,7 @@ class ProductManagementApplicationTests {
 	void createUser() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException {
 		assertEquals(Constants.USER_ADDED, proService.createUser(Collections.singletonList(new Users(genrationService.generateUserSequence(Users.SEQUENCE_NAME),"hi", "hello",
-				"xyz@a.com", "8877996655", "gimb", "admin", Collections.singletonList(new Roles("ROLE_ADMIN"))))));
+				"xyz@a.com", "8877996655", "gimb", Collections.singletonList(new Roles("ROLE_ADMIN"))))));
 
 	}
 

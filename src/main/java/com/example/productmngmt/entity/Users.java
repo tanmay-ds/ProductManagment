@@ -44,7 +44,7 @@ public class Users implements Serializable {
 	}
 
 	public Users(Long uuid, @NotNull String firstName, @NotNull String lastName, @NotNull String email,
-			@NotNull String phoneNumber, @NotNull String address, @NotNull String password, List<Roles> roles) {
+			@NotNull String phoneNumber, @NotNull String address, List<Roles> roles) {
 		super();
 		this.uuid = uuid;
 		this.firstName = firstName;
@@ -52,7 +52,7 @@ public class Users implements Serializable {
 		this.email = email;
 		this.phoneNumber = phoneNumber;
 		this.address = address;
-		this.password = password;
+		this.password = "admin";
 		this.roles = roles;
 	}
 
