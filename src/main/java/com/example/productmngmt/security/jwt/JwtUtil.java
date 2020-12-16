@@ -1,33 +1,31 @@
 package com.example.productmngmt.security.jwt;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import com.example.productmngmt.model.MyUserDetails;
 
+@Component
 public class JwtUtil {
-	
-	private static String jwt;
-	
-	private JwtUtil() {
-	    throw new IllegalStateException("JWT util");
-	  }
 
+	private String jwt;
 
 	public static Long getUuidFromToken() {
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		MyUserDetails principal = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		if (principal instanceof MyUserDetails) {
-			return ((MyUserDetails) principal).getUser().getUuid();
+			return principal.getUser().getUuid();
 		} else {
 			return null;
 		}
 	}
 
-	public static void setToken(String jwt) {
-		JwtUtil.jwt = jwt;		
+	public void setToken(String jwt) {
+		this.jwt = jwt;
 	}
-	
-	public static String getToken() {
+
+	public String getToken() {
 		return jwt;
 	}
 

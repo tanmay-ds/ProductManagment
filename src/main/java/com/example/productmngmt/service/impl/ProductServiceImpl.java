@@ -55,7 +55,10 @@ public class ProductServiceImpl implements ProductService {
 	MyUserDetailsServiceImpl myUserDetailsService;
 
 	@Autowired
-	JwtTokenProvider jwtUtil;
+	JwtTokenProvider jwtTokenProvider;
+	
+	@Autowired
+	JwtUtil jwtUtil;
 
 	@Autowired
 	ProductRepo productRepo;
@@ -87,7 +90,7 @@ public class ProductServiceImpl implements ProductService {
 			throw new BadCredsException("Incorrect username or password");
 		}
 		final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authRequest.getUsername());
-		return jwtUtil.genrateToken(userDetails);
+		return jwtTokenProvider.genrateToken(userDetails);
 	}
 
 	@Override
@@ -217,9 +220,8 @@ public class ProductServiceImpl implements ProductService {
 	private void doTokenBlackList() {
 		Long uuid = JwtUtil.getUuidFromToken();
 		BlackListedToken blackListedToken = new BlackListedToken();
-		blackListedToken.setId(genrationService.generateBlackListSequence(BlackListedToken.SEQUENCE_NAME));
 		blackListedToken.setUuid(uuid);
-		blackListedToken.setAccesToken(JwtUtil.getToken());
+		blackListedToken.setAccesToken(jwtUtil.getToken());
 		blackListedTokenRepo.save(blackListedToken);		
 	}
 

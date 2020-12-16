@@ -37,6 +37,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	@Autowired
 	CryptoUtil cryptoUtil;
+	
+	@Autowired
+	JwtUtil jwtutil;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -53,7 +56,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 				UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
-				JwtUtil.setToken(jwt);
+				jwtutil.setToken(jwt);
 				jwtTokenProvider.checkIfUserAccessTokenBlackListed(jwt);
 
 				if (Boolean.TRUE.equals(jwtTokenProvider.validateToken(jwt, userDetails))) {
@@ -66,6 +69,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 
 		} catch (ExpiredJwtException e) {
+
 			PrintWriter out = response.getWriter();
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
@@ -74,8 +78,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			ResponseMessage responseMessage = new ResponseMessage(new Date(), HttpStatus.UNAUTHORIZED, "Token Expired");
 			out.print(mapper.writeValueAsString(responseMessage));
 			out.flush();
-		}
-		catch (AccessDeniedException e) {
+		} catch (AccessDeniedException e) {
 			PrintWriter out = response.getWriter();
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
