@@ -10,14 +10,16 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.example.productmngmt.entity.Product;
 import com.example.productmngmt.template.ProductRepositoryTemplate;
 
-public interface ProductRepo extends MongoRepository<Product,Long>, ProductRepositoryTemplate {
+public interface ProductRepo extends MongoRepository<Product, Long>, ProductRepositoryTemplate {
 
 	Optional<Product> findByName(String name);
-	
+
 	List<Product> findProductByNameIgnoreCase(String productName);
 
-	Page<Product> findByNamePartialSearch(String regex,Pageable pageable);
-	
-	Page<Product> findByNameRegex(String name,Pageable pageable);
-	
+	Page<Product> findByNamePartialSearch(String regex, Pageable pageable);
+
+	Page<Product> findByNameRegex(String name, Pageable pageable);
+
+	Product findByProdId(Long pid);
+
 }

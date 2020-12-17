@@ -67,7 +67,7 @@ public class JwtTokenProvider {
 
 	public void checkIfUserAccessTokenBlackListed(String jwt) {
 		if(!jwt.isEmpty() && !blacklistedTokenRepo.findByAccesToken(jwt).isEmpty()) {
-    		throw new AccessDeniedException("Invalid token");
+    		throw new AccessDeniedException("Invalid Token");
 		} 
 	}
 

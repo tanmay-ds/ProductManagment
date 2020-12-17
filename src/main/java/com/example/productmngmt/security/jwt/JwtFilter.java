@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.productmngmt.exceptionhandler.ResponseMessage;
+import com.example.productmngmt.model.ResponseModel;
 import com.example.productmngmt.service.impl.MyUserDetailsServiceImpl;
 import com.example.productmngmt.util.CryptoUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +37,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	@Autowired
 	CryptoUtil cryptoUtil;
-	
+
 	@Autowired
 	JwtUtil jwtutil;
 
@@ -49,8 +49,8 @@ public class JwtFilter extends OncePerRequestFilter {
 		String jwt = null;
 
 		try {
-			if (authorizationHeader != null) {
-				jwt = authorizationHeader;
+			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+				jwt = authorizationHeader.substring(7);
 				username = jwtTokenProvider.extractUsername(jwt);
 			}
 
@@ -68,23 +68,15 @@ public class JwtFilter extends OncePerRequestFilter {
 			}
 			filterChain.doFilter(request, response);
 
-		} catch (ExpiredJwtException e) {
+		} catch (ExpiredJwtException | AccessDeniedException e) {
 
 			PrintWriter out = response.getWriter();
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			ObjectMapper mapper = new ObjectMapper();
-			ResponseMessage responseMessage = new ResponseMessage(new Date(), HttpStatus.UNAUTHORIZED, "Token Expired");
-			out.print(mapper.writeValueAsString(responseMessage));
-			out.flush();
-		} catch (AccessDeniedException e) {
-			PrintWriter out = response.getWriter();
-			response.setContentType("application/json");
-			response.setCharacterEncoding("UTF-8");
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			ObjectMapper mapper = new ObjectMapper();
-			ResponseMessage responseMessage = new ResponseMessage(new Date(), HttpStatus.UNAUTHORIZED, "Token Invalid");
+			ResponseModel responseMessage = new ResponseModel(new Date(), HttpStatus.UNAUTHORIZED,
+					e.getMessage());
 			out.print(mapper.writeValueAsString(responseMessage));
 			out.flush();
 		}

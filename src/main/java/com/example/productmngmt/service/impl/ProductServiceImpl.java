@@ -14,6 +14,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -34,7 +35,7 @@ import com.example.productmngmt.exceptionhandler.BadCredsException;
 import com.example.productmngmt.exceptionhandler.NegativeArgumentException;
 import com.example.productmngmt.exceptionhandler.NoSuchProductFound;
 import com.example.productmngmt.exceptionhandler.ProductAlreadyExists;
-import com.example.productmngmt.exceptionhandler.ResponseMessage;
+import com.example.productmngmt.model.ResponseModel;
 import com.example.productmngmt.repo.BlackListedTokenRepo;
 import com.example.productmngmt.repo.ProductRepo;
 import com.example.productmngmt.repo.UserRepo;
@@ -90,43 +91,54 @@ public class ProductServiceImpl implements ProductService {
 			throw new BadCredsException("Incorrect username or password");
 		}
 		final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authRequest.getUsername());
-		return jwtTokenProvider.genrateToken(userDetails);
+		return "Bearer "+jwtTokenProvider.genrateToken(userDetails);
 	}
 
 	@Override
 	public List<String> create(List<ProductDto> productsDto) {
 
-		List<Product> saveProducts = new ArrayList<>();
-		List<String> productNames = productsDto.stream().map(product -> product.getName().toLowerCase())
-				.collect(Collectors.toList());
-		List<String> messages = new ArrayList<>();
-		List<String> checkProducts = productRepo.findAll().stream()
-				.filter(name -> productNames.contains(name.getName().toLowerCase()))
-				.map(product -> product.getName().toLowerCase()).collect(Collectors.toList());
+//		try {
+			List<Product> saveProducts = new ArrayList<>();
+			List<String> productNames = productsDto.stream().map(product -> product.getName().toLowerCase())
+					.collect(Collectors.toList());
+			List<String> messages = new ArrayList<>();
+			List<String> checkProducts = productRepo.findAll().stream()
+					.filter(name -> productNames.contains(name.getName().toLowerCase()))
+					.map(product -> product.getName().toLowerCase()).collect(Collectors.toList());
+	//
+			if (!checkProducts.isEmpty()) {
+				throw new ProductAlreadyExists(Constants.PRODUCT_WITH_NAME + checkProducts + Constants.ALREADY_EXITS);
+			}
 
-		if (!checkProducts.isEmpty()) {
-			throw new ProductAlreadyExists(Constants.PRODUCT_WITH_NAME + checkProducts + Constants.ALREADY_EXITS);
-		}
+			for (ProductDto productDto : productsDto) {
+				Product product = dtos.dtoToProduct(productDto);
+				product.setProdId(genrationService.generateProductSequence(Product.SEQUENCE_NAME));
+				product.setQuantity(0l);
+				messages.add(Constants.PRODUCT_ADDED_WITH_ID + product.getProdId());
+				saveProducts.add(product);
+//				productRepo.save(product);
+			}
 
-		for (ProductDto productDto : productsDto) {
-			Product product = dtos.dtoToProduct(productDto);
-			product.setProdId(genrationService.generateProductSequence(Product.SEQUENCE_NAME));
-			product.setQuantity(0l);
-			messages.add(Constants.PRODUCT_ADDED_WITH_ID + product.getProdId());
-			saveProducts.add(product);
-		}
-
-		productRepo.saveAll(saveProducts);
-		return messages;
+			productRepo.saveAll(saveProducts);
+			return messages;
+//		} catch (DuplicateKeyException e) {
+//			String index = e.getLocalizedMessage().substring(e.getLocalizedMessage().indexOf("name"));
+//			throw new ProductAlreadyExists(
+					
+//					Constants.PRODUCT_WITH_NAME +e.getLocalizedMessage().substring(e.getLocalizedMessage().indexOf("name: ")+7,e.getLocalizedMessage().indexOf("}")-2)+Constants.ALREADY_EXITS
+//					);
+			
+//		}
+		
 	}
 
 	@Override
 	public Product getProductById(Long pid) {
-		Optional<Product> checkProduct = productRepo.findById(pid);
-		if (!checkProduct.isPresent()) {
+		Product checkProduct = productRepo.findByProdId(pid);
+		if (!checkProduct.equals(new Product())) {
 			throw new NoSuchProductFound(Constants.PRODUCT_WITH_ID + pid + Constants.NOT_FOUND);
 		} else
-			return dtos.optionalToProduct(checkProduct);
+			return checkProduct;
 	}
 
 	@Override
@@ -137,7 +149,6 @@ public class ProductServiceImpl implements ProductService {
 		updateProduct.setProdId(getProduct.getProdId());
 		updateProduct.setQuantity(getProduct.getQuantity());
 		return productRepo.save(updateProduct);
-
 	}
 
 	@Override
@@ -170,7 +181,6 @@ public class ProductServiceImpl implements ProductService {
 			product.setQuantity(product.getQuantity() + stockList.get(id));
 			productRepo.save(product);
 		}
-
 		return Constants.STOCKS_ADDED;
 	}
 
@@ -211,10 +221,10 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public ResponseMessage logoutUser() {
+	public ResponseModel logoutUser() {
 		
 		doTokenBlackList();
-		return new ResponseMessage(new Date(), HttpStatus.OK, "logout sucess");
+		return new ResponseModel(new Date(), HttpStatus.OK, "logout sucess");
 	}
 
 	private void doTokenBlackList() {
