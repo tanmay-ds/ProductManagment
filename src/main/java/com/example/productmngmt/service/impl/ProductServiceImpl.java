@@ -3,7 +3,6 @@ package com.example.productmngmt.service.impl;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,7 +32,6 @@ import com.example.productmngmt.exceptionhandler.BadCredsException;
 import com.example.productmngmt.exceptionhandler.NegativeArgumentException;
 import com.example.productmngmt.exceptionhandler.NoSuchProductFound;
 import com.example.productmngmt.exceptionhandler.ProductAlreadyExists;
-import com.example.productmngmt.exceptionhandler.ResponseMessage;
 import com.example.productmngmt.repo.BlackListedTokenRepo;
 import com.example.productmngmt.repo.ProductRepo;
 import com.example.productmngmt.repo.UserRepo;
@@ -52,35 +49,35 @@ public class ProductServiceImpl implements ProductService {
 	private AuthenticationManager authenticationManager;
 
 	@Autowired
-	MyUserDetailsServiceImpl myUserDetailsService;
-
-	@Autowired
-	JwtTokenProvider jwtTokenProvider;
+	SequenceGenrationService sequenceGenrationService;
 	
 	@Autowired
-	JwtUtil jwtUtil;
-
-	@Autowired
-	ProductRepo productRepo;
+	MyUserDetailsServiceImpl myUserDetailsService;
 	
 	@Autowired
 	BlackListedTokenRepo blackListedTokenRepo;
 
 	@Autowired
-	SequenceGenrationService genrationService;
-
+	JwtTokenProvider jwtTokenProvider;
+	
 	@Autowired
 	MongoTemplate mongoTemplate;
-
+	
 	@Autowired
-	Dtos dtos;
-
+	ProductRepo productRepo;
+	
+	@Autowired
+	CryptoUtil cryptoUtil;
+	
 	@Autowired
 	UserRepo userRepo;
 
 	@Autowired
-	CryptoUtil cryptoUtil;
-	
+	JwtUtil jwtUtil;
+
+	@Autowired
+	Dtos dtos;
+
 	@Override
 	public String authenticate(AuthRequest authRequest) {
 		try {
@@ -90,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
 			throw new BadCredsException("Incorrect username or password");
 		}
 		final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authRequest.getUsername());
-		return jwtTokenProvider.genrateToken(userDetails);
+		return "Bearer " + jwtTokenProvider.genrateToken(userDetails);
 	}
 
 	@Override
@@ -110,19 +107,18 @@ public class ProductServiceImpl implements ProductService {
 
 		for (ProductDto productDto : productsDto) {
 			Product product = dtos.dtoToProduct(productDto);
-			product.setProdId(genrationService.generateProductSequence(Product.SEQUENCE_NAME));
+			product.setProdId(sequenceGenrationService.generateProductSequence(Product.SEQUENCE_NAME));
 			product.setQuantity(0l);
 			messages.add(Constants.PRODUCT_ADDED_WITH_ID + product.getProdId());
 			saveProducts.add(product);
 		}
-
 		productRepo.saveAll(saveProducts);
 		return messages;
 	}
 
 	@Override
 	public Product getProductById(Long pid) {
-		Optional<Product> checkProduct = productRepo.findById(pid);
+		Optional<Product> checkProduct = productRepo.findByProdId(pid);
 		if (!checkProduct.isPresent()) {
 			throw new NoSuchProductFound(Constants.PRODUCT_WITH_ID + pid + Constants.NOT_FOUND);
 		} else
@@ -131,13 +127,12 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public Product updateProd(Long pid, ProductDto productDto) {
-
 		Product getProduct = getProductById(pid);
 		Product updateProduct = dtos.dtoToProduct(productDto);
+		updateProduct.setId(getProduct.getId());
 		updateProduct.setProdId(getProduct.getProdId());
 		updateProduct.setQuantity(getProduct.getQuantity());
 		return productRepo.save(updateProduct);
-
 	}
 
 	@Override
@@ -203,7 +198,7 @@ public class ProductServiceImpl implements ProductService {
 		List<Users> encryptedUsers = new ArrayList<>();
 		for (Users user : users) {
 			Users encrypteduser = dtos.encrypt(user);
-			encrypteduser.setUuid(genrationService.generateUserSequence(Users.SEQUENCE_NAME));
+			encrypteduser.setUuid(sequenceGenrationService.generateUserSequence(Users.SEQUENCE_NAME));
 			encryptedUsers.add(encrypteduser);
 		}
 		userRepo.saveAll(encryptedUsers);
@@ -211,10 +206,9 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public ResponseMessage logoutUser() {
-		
+	public String logoutUser() {
 		doTokenBlackList();
-		return new ResponseMessage(new Date(), HttpStatus.OK, "logout sucess");
+		return "Logout success";
 	}
 
 	private void doTokenBlackList() {
@@ -222,7 +216,7 @@ public class ProductServiceImpl implements ProductService {
 		BlackListedToken blackListedToken = new BlackListedToken();
 		blackListedToken.setUuid(uuid);
 		blackListedToken.setAccesToken(jwtUtil.getToken());
-		blackListedTokenRepo.save(blackListedToken);		
+		blackListedTokenRepo.save(blackListedToken);
 	}
 
 }

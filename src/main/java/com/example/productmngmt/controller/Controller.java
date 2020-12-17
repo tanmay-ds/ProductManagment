@@ -27,10 +27,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.productmngmt.constant.Constants;
 import com.example.productmngmt.dto.ProductDto;
 import com.example.productmngmt.entity.Product;
 import com.example.productmngmt.entity.Users;
-import com.example.productmngmt.exceptionhandler.ResponseMessage;
+import com.example.productmngmt.model.ResponseModel;
 import com.example.productmngmt.security.jwt.AuthRequest;
 import com.example.productmngmt.service.ProductService;
 
@@ -43,21 +44,24 @@ public class Controller {
 	ProductService proService;
 
 	@PostMapping("authenticate")
-	public ResponseEntity<ResponseMessage> authenticate(@RequestBody AuthRequest authRequest) {
-		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK,
-				"Token : " + proService.authenticate(authRequest)));
+	public ResponseEntity<ResponseModel> authenticate(@RequestBody AuthRequest authRequest) {
+		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+				Map.of(Constants.TOKEN_KEY, proService.authenticate(authRequest))));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("create")
-	public ResponseEntity<List<String>> createProduct(@RequestBody List<@Valid ProductDto> productsDto) {
-		return ResponseEntity.ok(proService.create(productsDto));
+	public ResponseEntity<ResponseModel> createProduct(@RequestBody List<@Valid ProductDto> productsDto) {
+		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+				Map.of(Constants.MESSAGE_KEY, proService.create(productsDto))));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("createuser")
-	public ResponseEntity<String> createUser(@RequestBody List<@Valid Users> users) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		return ResponseEntity.ok(proService.createUser(users));
+	public ResponseEntity<ResponseModel> createUser(@RequestBody List<@Valid Users> users) throws InvalidKeyException,
+			NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+				Map.of(Constants.MESSAGE_KEY, proService.createUser(users))));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
@@ -74,41 +78,42 @@ public class Controller {
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@GetMapping("getall")
-
 	public ResponseEntity<Page<Product>> getall(Pageable pageable) {
 		return ResponseEntity.ok(proService.getAll(pageable));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@GetMapping("getall/{search}")
-
 	public ResponseEntity<Page<Product>> getall(@PathVariable String search, Pageable pageable) {
 		return ResponseEntity.ok(proService.getAll(search, pageable));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@DeleteMapping("delete/{pid}")
-	public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long pid) {
-		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK,
-				"Product with Id : " + proService.deleteProd(pid) + " is deleted"));
+	public ResponseEntity<ResponseModel> deleteProduct(@PathVariable Long pid) {
+		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+				Map.of(Constants.MESSAGE_KEY, "Product with Id : " + proService.deleteProd(pid) + " is deleted")));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("addStock")
-	public ResponseEntity<ResponseMessage> addStock(@RequestBody Map<Long, Long> stockList) {
-		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK, proService.addStock(stockList)));
+	public ResponseEntity<ResponseModel> addStock(@RequestBody Map<Long, Long> stockList) {
+		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+				Map.of(Constants.MESSAGE_KEY, proService.addStock(stockList))));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("removeStock")
-	public ResponseEntity<ResponseMessage> removeStock(@RequestBody Map<Long, Long> stockList) {
-		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK, proService.removeStock(stockList)));
+	public ResponseEntity<ResponseModel> removeStock(@RequestBody Map<Long, Long> stockList) {
+		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+				Map.of(Constants.MESSAGE_KEY, proService.removeStock(stockList))));
 	}
-	
+
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@GetMapping("/logout")
-	public ResponseEntity<ResponseMessage> logout(){
-		return ResponseEntity.ok(proService.logoutUser());
-		
+	public ResponseEntity<ResponseModel> logout() {
+		return ResponseEntity.ok(
+				new ResponseModel(new Date(), HttpStatus.OK, Map.of(Constants.MESSAGE_KEY, proService.logoutUser())));
+
 	}
 }

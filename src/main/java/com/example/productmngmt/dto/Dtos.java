@@ -24,10 +24,10 @@ import com.example.productmngmt.util.CryptoUtil;
 public class Dtos {
 
 	@Autowired
-	CryptoUtil cryptoUtil;
+	PasswordEncoder passwordEncoder;
 
 	@Autowired
-	PasswordEncoder passwordEncoder;
+	CryptoUtil cryptoUtil;
 
 	@Value("${key}")
 	private String key;
@@ -35,6 +35,7 @@ public class Dtos {
 	public Product optionalToProduct(Optional<Product> optional) {
 		Product product = new Product();
 		if (optional.isPresent()) {
+			product.setId(optional.get().getId());
 			product.setProdId(optional.get().getProdId());
 			product.setName(optional.get().getName());
 			product.setBrand(optional.get().getBrand());

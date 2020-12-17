@@ -46,6 +46,12 @@ import com.example.productmngmt.service.SequenceGenrationService;
 @ActiveProfiles(profiles = "local")
 class ProductManagementApplicationTests {
 
+	@Autowired 
+	SequenceGenrationService genrationService;
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
+	
 	@Autowired
 	ProductService proService;
 
@@ -57,12 +63,6 @@ class ProductManagementApplicationTests {
 
 	@Autowired
 	Dtos dtos;
-
-	@Autowired
-	PasswordEncoder passwordEncoder;
-	
-	@Autowired 
-	SequenceGenrationService genrationService;
 
 	List<Product> products = new ArrayList<>();
 
