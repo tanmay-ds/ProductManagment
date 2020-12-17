@@ -30,8 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.productmngmt.dto.ProductDto;
 import com.example.productmngmt.entity.Product;
 import com.example.productmngmt.entity.Users;
-import com.example.productmngmt.model.ResponseModel;
-import com.example.productmngmt.model.TokenResponseModel;
+import com.example.productmngmt.exceptionhandler.ResponseMessage;
 import com.example.productmngmt.security.jwt.AuthRequest;
 import com.example.productmngmt.service.ProductService;
 
@@ -44,10 +43,9 @@ public class Controller {
 	ProductService proService;
 
 	@PostMapping("authenticate")
-	public ResponseEntity<ResponseModel> authenticate(@RequestBody AuthRequest authRequest) {
-		return ResponseEntity.ok(
-				new ResponseModel(new Date(), HttpStatus.OK,new TokenResponseModel(proService.authenticate(authRequest)))
-		);
+	public ResponseEntity<ResponseMessage> authenticate(@RequestBody AuthRequest authRequest) {
+		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK,
+				"Token : " + proService.authenticate(authRequest)));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
@@ -58,21 +56,20 @@ public class Controller {
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("createuser")
-	public ResponseEntity<String> createUser(@RequestBody List<@Valid Users> users) throws InvalidKeyException,
-			NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	public ResponseEntity<String> createUser(@RequestBody List<@Valid Users> users) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		return ResponseEntity.ok(proService.createUser(users));
-	}
-
-	@PreAuthorize("hasAnyRole('ADMIN')")
-	@PutMapping("update/{pid}")
-	public ResponseEntity<Product> updateProduct(@PathVariable Long pid, @RequestBody ProductDto productDto) {
-		return ResponseEntity.ok(proService.updateProd(pid, productDto));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@GetMapping("getproduct/{pid}")
 	public ResponseEntity<Product> getProductById(@PathVariable Long pid) {
 		return ResponseEntity.ok(proService.getProductById(pid));
+	}
+
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PutMapping("update/{pid}")
+	public ResponseEntity<Product> updateProduct(@PathVariable Long pid, @RequestBody ProductDto productDto) {
+		return ResponseEntity.ok(proService.updateProd(pid, productDto));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
@@ -91,27 +88,27 @@ public class Controller {
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@DeleteMapping("delete/{pid}")
-	public ResponseEntity<ResponseModel> deleteProduct(@PathVariable Long pid) {
-		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+	public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long pid) {
+		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK,
 				"Product with Id : " + proService.deleteProd(pid) + " is deleted"));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("addStock")
-	public ResponseEntity<ResponseModel> addStock(@RequestBody Map<Long, Long> stockList) {
-		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK, proService.addStock(stockList)));
+	public ResponseEntity<ResponseMessage> addStock(@RequestBody Map<Long, Long> stockList) {
+		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK, proService.addStock(stockList)));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("removeStock")
-	public ResponseEntity<ResponseModel> removeStock(@RequestBody Map<Long, Long> stockList) {
-		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK, proService.removeStock(stockList)));
+	public ResponseEntity<ResponseMessage> removeStock(@RequestBody Map<Long, Long> stockList) {
+		return ResponseEntity.ok(new ResponseMessage(new Date(), HttpStatus.OK, proService.removeStock(stockList)));
 	}
-
+	
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@GetMapping("/logout")
-	public ResponseEntity<ResponseModel> logout() {
+	public ResponseEntity<ResponseMessage> logout(){
 		return ResponseEntity.ok(proService.logoutUser());
-
+		
 	}
 }

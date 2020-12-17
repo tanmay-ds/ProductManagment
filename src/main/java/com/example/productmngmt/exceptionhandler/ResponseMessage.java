@@ -1,25 +1,27 @@
-package com.example.productmngmt.model;
+package com.example.productmngmt.exceptionhandler;
 
 import java.util.Date;
 
 import org.springframework.http.HttpStatus;
 
-public class ResponseModel {
+public class ResponseMessage {
 
 	private Date timestamp;
 	private HttpStatus status;
-	private Object data;
+	private String message;
 
-	public ResponseModel() {
+	
+	
+	public ResponseMessage() {
 	}
 
-	public ResponseModel(Date timestamp, HttpStatus status, Object data) {
+	public ResponseMessage(Date timestamp, HttpStatus status,String message) {
 		super();
 		this.timestamp = timestamp;
 		this.status = status;
-		this.data = data;
+		this.message = message;
 	}
-
+	
 	public HttpStatus getStatus() {
 		return status;
 	}
@@ -36,12 +38,12 @@ public class ResponseModel {
 		this.timestamp = timestamp;
 	}
 
-	public Object getData() {
-		return data;
+	public String getMessage() {
+		return message;
 	}
 
-	public void setData(Object data) {
-		this.data = data;
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 }

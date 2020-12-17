@@ -5,7 +5,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "Product")
@@ -18,7 +17,6 @@ public class Product {
 	private String id;
 
 	private Long prodId;
-//	@Indexed(unique = true)
 	@NotNull
 	private String name;
 	@NotNull

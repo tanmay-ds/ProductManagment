@@ -2,7 +2,6 @@ package com.example.productmngmt.entity;
 
 import java.util.Date;
 
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -13,14 +12,12 @@ public class BlackListedToken {
 
 	@Id
 	private String id;
-
+	
 	private Long uuid;
 	private String accesToken;
 	@Indexed(expireAfterSeconds = 36000)
 	@CreatedDate
 	private Date createdOn;
-	@CreatedBy
-	private String createdBy;
 
 	public String getId() {
 		return id;
@@ -45,7 +42,5 @@ public class BlackListedToken {
 	public void setAccesToken(String accesToken) {
 		this.accesToken = accesToken;
 	}
-	
-	
 
 }
