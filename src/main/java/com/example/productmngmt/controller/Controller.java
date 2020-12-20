@@ -45,14 +45,14 @@ public class Controller {
 
 	@PostMapping("authenticate")
 	public ResponseEntity<ResponseModel> authenticate(@RequestBody AuthRequest authRequest) {
-		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+		return ResponseEntity.ok(new ResponseModel(new Date().toString(), HttpStatus.OK,
 				Map.of(Constants.TOKEN_KEY, proService.authenticate(authRequest))));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("create")
 	public ResponseEntity<ResponseModel> createProduct(@RequestBody List<@Valid ProductDto> productsDto) {
-		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+		return ResponseEntity.ok(new ResponseModel(new Date().toString(), HttpStatus.OK,
 				Map.of(Constants.MESSAGE_KEY, proService.create(productsDto))));
 	}
 
@@ -60,7 +60,7 @@ public class Controller {
 	@PostMapping("createuser")
 	public ResponseEntity<ResponseModel> createUser(@RequestBody List<@Valid Users> users) throws InvalidKeyException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+		return ResponseEntity.ok(new ResponseModel(new Date().toString(), HttpStatus.OK,
 				Map.of(Constants.MESSAGE_KEY, proService.createUser(users))));
 	}
 
@@ -91,29 +91,29 @@ public class Controller {
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@DeleteMapping("delete/{pid}")
 	public ResponseEntity<ResponseModel> deleteProduct(@PathVariable Long pid) {
-		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+		return ResponseEntity.ok(new ResponseModel(new Date().toString(), HttpStatus.OK,
 				Map.of(Constants.MESSAGE_KEY, "Product with Id : " + proService.deleteProd(pid) + " is deleted")));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("addStock")
 	public ResponseEntity<ResponseModel> addStock(@RequestBody Map<Long, Long> stockList) {
-		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+		return ResponseEntity.ok(new ResponseModel(new Date().toString(), HttpStatus.OK,
 				Map.of(Constants.MESSAGE_KEY, proService.addStock(stockList))));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("removeStock")
 	public ResponseEntity<ResponseModel> removeStock(@RequestBody Map<Long, Long> stockList) {
-		return ResponseEntity.ok(new ResponseModel(new Date(), HttpStatus.OK,
+		return ResponseEntity.ok(new ResponseModel(new Date().toString(), HttpStatus.OK,
 				Map.of(Constants.MESSAGE_KEY, proService.removeStock(stockList))));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@GetMapping("/logout")
 	public ResponseEntity<ResponseModel> logout() {
-		return ResponseEntity.ok(
-				new ResponseModel(new Date(), HttpStatus.OK, Map.of(Constants.MESSAGE_KEY, proService.logoutUser())));
+		return ResponseEntity.ok(new ResponseModel(new Date().toString(), HttpStatus.OK,
+				Map.of(Constants.MESSAGE_KEY, proService.logoutUser())));
 
 	}
 }

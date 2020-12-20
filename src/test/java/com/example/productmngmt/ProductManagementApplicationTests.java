@@ -97,7 +97,7 @@ class ProductManagementApplicationTests {
 		Exception exception = assertThrows(ProductAlreadyExists.class, () -> proService.create(duplicateProduct));
 		assertEquals(Constants.PRODUCT_WITH_NAME
 				+ duplicateProduct.stream().map(p -> p.getName().toLowerCase()).collect(Collectors.toList())
-				+ Constants.ALREADY_EXITS, exception.getMessage());
+				+ Constants.ALREADY_EXISTS, exception.getMessage());
 
 	}
 

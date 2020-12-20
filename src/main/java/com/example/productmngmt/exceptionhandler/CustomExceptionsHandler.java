@@ -31,11 +31,7 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(DuplicateKeyException.class)
 	public final ResponseEntity<ResponseModel> duplicateProductHandler(DuplicateKeyException e, WebRequest request) {
 		return internalServerError(
-				Constants.PRODUCT_WITH_NAME + 
-				e.getLocalizedMessage()
-				.substring(e.getLocalizedMessage().indexOf("name: \"") + 7, e.getLocalizedMessage().indexOf("}") - 2)
-				+ Constants.ALREADY_EXITS
-				);
+				Constants.PRODUCT_ALREADY_EXISTS);
 	}
 
 	@ExceptionHandler(NegativeArgumentException.class)
@@ -45,7 +41,7 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(BadCredsException.class)
 	public final ResponseEntity<ResponseModel> badCred(BadCredsException e, WebRequest request) {
-		return new ResponseEntity<>(new ResponseModel(new Date(), HttpStatus.UNAUTHORIZED, e.getLocalizedMessage()),
+		return new ResponseEntity<>(new ResponseModel(new Date().toString(), HttpStatus.UNAUTHORIZED, e.getLocalizedMessage()),
 				new HttpHeaders(), HttpStatus.UNAUTHORIZED);
 	}
 
@@ -56,7 +52,7 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	private ResponseEntity<ResponseModel> internalServerError(String message) {
 		return new ResponseEntity<>(
-				new ResponseModel(new Date(), HttpStatus.INTERNAL_SERVER_ERROR, Map.of("message", message)),
+				new ResponseModel(new Date().toString(), HttpStatus.INTERNAL_SERVER_ERROR, Map.of("message", message)),
 				new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 
 	}

@@ -75,7 +75,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			response.setCharacterEncoding("UTF-8");
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			ObjectMapper mapper = new ObjectMapper();
-			ResponseModel responseMessage = new ResponseModel(new Date(), HttpStatus.UNAUTHORIZED, e.getLocalizedMessage());
+			ResponseModel responseMessage = new ResponseModel(new Date().toString(), HttpStatus.UNAUTHORIZED, e.getLocalizedMessage());
 			out.print(mapper.writeValueAsString(responseMessage));
 			out.flush();
 		}

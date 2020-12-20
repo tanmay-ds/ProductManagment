@@ -50,25 +50,25 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	SequenceGenrationService sequenceGenrationService;
-	
+
 	@Autowired
 	MyUserDetailsServiceImpl myUserDetailsService;
-	
+
 	@Autowired
 	BlackListedTokenRepo blackListedTokenRepo;
 
 	@Autowired
 	JwtTokenProvider jwtTokenProvider;
-	
+
 	@Autowired
 	MongoTemplate mongoTemplate;
-	
+
 	@Autowired
 	ProductRepo productRepo;
-	
+
 	@Autowired
 	CryptoUtil cryptoUtil;
-	
+
 	@Autowired
 	UserRepo userRepo;
 
@@ -102,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
 				.map(product -> product.getName().toLowerCase()).collect(Collectors.toList());
 
 		if (!checkProducts.isEmpty()) {
-			throw new ProductAlreadyExists(Constants.PRODUCT_WITH_NAME + checkProducts + Constants.ALREADY_EXITS);
+			throw new ProductAlreadyExists(Constants.PRODUCT_WITH_NAME + checkProducts + Constants.ALREADY_EXISTS);
 		}
 
 		for (ProductDto productDto : productsDto) {

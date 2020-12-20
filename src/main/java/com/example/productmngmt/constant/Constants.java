@@ -9,7 +9,8 @@ public class Constants {
 	public static final String PRODUCT_WITH_ID = "Product with Id: ";
 	public static final String PRODUCT_WITH_NAME = "Product with name: ";
 	public static final String PRODUCT_ADDED_WITH_ID = "Product added with Id: ";
-	public static final String ALREADY_EXITS = " already exixts.";
+	public static final String PRODUCT_ALREADY_EXISTS = "Product Already Exists";
+	public static final String ALREADY_EXISTS = " already exists.";
 	public static final String MESSAGE_KEY = "message";
 	public static final String TOKEN_KEY = "token";
 	public static final String NOT_FOUND = " not found.";

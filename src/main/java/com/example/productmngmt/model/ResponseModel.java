@@ -1,26 +1,25 @@
 package com.example.productmngmt.model;
 
-import java.util.Date;
 
 import org.springframework.http.HttpStatus;
 
 public class ResponseModel {
 
-	private Date timestamp;
+	private Object timestamp;
 	private HttpStatus status;
 	private Object data;
 
-	public ResponseModel(Date timestamp, HttpStatus status, Object data) {
+	public ResponseModel(Object timestamp, HttpStatus status, Object data) {
 		this.timestamp = timestamp;
 		this.status = status;
 		this.data = data;
 	}
 
-	public Date getTimestamp() {
+	public Object getTimestamp() {
 		return timestamp;
 	}
 
-	public void setTimestamp(Date timestamp) {
+	public void setTimestamp(Object timestamp) {
 		this.timestamp = timestamp;
 	}
 
