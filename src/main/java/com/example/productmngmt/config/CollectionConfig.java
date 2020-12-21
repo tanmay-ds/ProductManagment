@@ -24,7 +24,7 @@ public class CollectionConfig {
 	@PostConstruct
 	public void initIndexes() {
 		mongoTemplate.indexOps(Product.class).ensureIndex(
-				new Index().on("name", Sort.Direction.ASC).unique().collation(Collation.of(Locale.getDefault()).strength(1))
+				new Index().on("name", Sort.Direction.ASC).unique().collation(Collation.of(Locale.ENGLISH))
 				);
 	}
 
