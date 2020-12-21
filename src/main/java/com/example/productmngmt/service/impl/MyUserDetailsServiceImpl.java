@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.example.productmngmt.dto.Dtos;
@@ -38,11 +37,8 @@ public class MyUserDetailsServiceImpl implements UserDetailsService {
 		try {
 			decryptedUser = dtos.decrypt(userRepo.findByEncryptEmail(username, key));
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException e1) {
+				| BadPaddingException | NullPointerException e1) {
 			throw new BadCredsException("Incorrect username or password");
-		}
-		if (decryptedUser == null) {
-			throw new UsernameNotFoundException("user not found ");
 		}
 
 		return new MyUserDetails(decryptedUser);

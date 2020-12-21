@@ -2,10 +2,8 @@ package com.example.productmngmt.exceptionhandler;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
 
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,8 +29,7 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(DuplicateKeyException.class)
 	public final ResponseEntity<ResponseModel> duplicateProductHandler(DuplicateKeyException e, WebRequest request) {
-		return internalServerError(
-				Constants.PRODUCT_ALREADY_EXISTS);
+		return internalServerError(Constants.PRODUCT_ALREADY_EXISTS);
 	}
 
 	@ExceptionHandler(NegativeArgumentException.class)
@@ -42,8 +39,8 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(BadCredsException.class)
 	public final ResponseEntity<ResponseModel> badCred(BadCredsException e, WebRequest request) {
-		return new ResponseEntity<ResponseModel>(new ResponseModel(new Date().toString(), HttpStatus.UNAUTHORIZED, e.getLocalizedMessage()),
-				new HttpHeaders(), HttpStatus.UNAUTHORIZED);
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				.body(new ResponseModel(new Date().toString(), HttpStatus.UNAUTHORIZED, e.getLocalizedMessage()));
 	}
 
 	@ExceptionHandler(ExpiredJwtTokenException.class)
@@ -52,9 +49,7 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 	}
 
 	private ResponseEntity<ResponseModel> internalServerError(String message) {
-		return new ResponseEntity<ResponseModel>(
-				new ResponseModel(new Date().toString(), HttpStatus.INTERNAL_SERVER_ERROR, Collections.singletonMap("message", message)),
-				new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
-
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseModel(new Date().toString(),
+				HttpStatus.INTERNAL_SERVER_ERROR, Collections.singletonMap("message", message)));
 	}
 }
