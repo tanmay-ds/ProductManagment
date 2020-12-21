@@ -1,5 +1,6 @@
 package com.example.productmngmt.exceptionhandler;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(BadCredsException.class)
 	public final ResponseEntity<ResponseModel> badCred(BadCredsException e, WebRequest request) {
-		return new ResponseEntity<>(new ResponseModel(new Date().toString(), HttpStatus.UNAUTHORIZED, e.getLocalizedMessage()),
+		return new ResponseEntity<ResponseModel>(new ResponseModel(new Date().toString(), HttpStatus.UNAUTHORIZED, e.getLocalizedMessage()),
 				new HttpHeaders(), HttpStatus.UNAUTHORIZED);
 	}
 
@@ -51,8 +52,8 @@ public class CustomExceptionsHandler extends ResponseEntityExceptionHandler {
 	}
 
 	private ResponseEntity<ResponseModel> internalServerError(String message) {
-		return new ResponseEntity<>(
-				new ResponseModel(new Date().toString(), HttpStatus.INTERNAL_SERVER_ERROR, Map.of("message", message)),
+		return new ResponseEntity<ResponseModel>(
+				new ResponseModel(new Date().toString(), HttpStatus.INTERNAL_SERVER_ERROR, Collections.singletonMap("message", message)),
 				new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 
 	}
