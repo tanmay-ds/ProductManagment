@@ -140,8 +140,8 @@ class ProductManagementApplicationTests {
 
 	@Test
 	void updateProductNotFound() {
-		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.updateProd(2l, productDto));
-		assertEquals(Constants.PRODUCT_WITH_ID + 2l + Constants.NOT_FOUND, exception.getMessage());
+		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.updateProd(9999l, productDto));
+		assertEquals(Constants.PRODUCT_WITH_ID + 9999l + Constants.NOT_FOUND, exception.getMessage());
 	}
 
 	@Test
