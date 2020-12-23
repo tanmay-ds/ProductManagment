@@ -2,20 +2,20 @@ package com.example.productmngmt.config.changelog;
 
 import java.util.Collections;
 
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.productmngmt.entity.Roles;
 import com.example.productmngmt.entity.Users;
-import com.github.mongobee.changeset.ChangeLog;
-import com.github.mongobee.changeset.ChangeSet;
+import com.example.productmngmt.repo.UserRepo;
 
+import io.changock.migration.api.annotations.ChangeLog;
+import io.changock.migration.api.annotations.ChangeSet;
 @ChangeLog
 public class DatabaseChangelog {
 
 	@Transactional
 	@ChangeSet(order = "001", id = "defaultUser", author = "system")
-	public void addDefaultUser(MongoTemplate mongoTemplate) {
+	public void addDefaultUser(UserRepo userRepo) {
 		Users user = new Users();
 		user.setUuid(1L);
 		user.setFirstName("mQ2hPvNqrShPOmLRtiqvlw==");
@@ -26,6 +26,6 @@ public class DatabaseChangelog {
 		user.setPhoneNumber("pe0P5BZvxnA3AlcklHlpjA==");
 		user.setRoles(Collections.singletonList(new Roles("cqKl2KMqYlESk2M6wUoUdQ==")));
 
-		mongoTemplate.insert(user);
+		userRepo.save(user);
 	}
 }

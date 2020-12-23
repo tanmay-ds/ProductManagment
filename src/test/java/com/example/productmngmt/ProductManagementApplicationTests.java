@@ -1,6 +1,7 @@
 package com.example.productmngmt;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -9,15 +10,15 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,8 +26,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.example.productmngmt.constant.Constants;
 import com.example.productmngmt.dto.Dtos;
@@ -42,10 +41,8 @@ import com.example.productmngmt.repo.UserRepo;
 import com.example.productmngmt.service.ProductService;
 import com.example.productmngmt.service.SequenceGenrationService;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-@ActiveProfiles(profiles = "local")
-public class ProductManagementApplicationTests {
+class ProductManagementApplicationTests {
 
 	@Autowired
 	SequenceGenrationService genrationService;
@@ -77,9 +74,9 @@ public class ProductManagementApplicationTests {
 	@Value("${key}")
 	private String key;
 
-	@Before
-	public void init() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-			IllegalBlockSizeException, BadPaddingException {
+	@BeforeEach
+	void init() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
+			BadPaddingException {
 
 		product = new Product(1l, "Earphones", "Samsoong", 10000l, "Wireless", 1l);
 		products.add(product);
@@ -92,94 +89,103 @@ public class ProductManagementApplicationTests {
 		proService.createUser(Collections.singletonList(user));
 	}
 
-	@Test(expected = ProductAlreadyExists.class)
-	public void duplicateName() {
-		List<ProductDto> duplicateProduct = new ArrayList<>();
-		duplicateProduct.add(new ProductDto("EarPhones", "Sony", 5999l, "Wirless ANC", 0l));
-		proService.create(duplicateProduct);
+	@Test
+	void duplicateName() {
+		List<ProductDto> duplicateProduct = new ArrayList<>(
+				List.of(new ProductDto("EarPhones", "Sony", 5999l, "Wirless ANC", 0l)));
+		Exception exception = assertThrows(ProductAlreadyExists.class, () -> proService.create(duplicateProduct));
+		assertEquals(Constants.PRODUCT_WITH_NAME
+				+ duplicateProduct.stream().map(p -> p.getName().toLowerCase()).collect(Collectors.toList())
+				+ Constants.ALREADY_EXISTS, exception.getMessage());
 	}
 
 	@Test
-	public void getAll() {
+	void getAll() {
 		Pageable pageable = PageRequest.of(0, 10);
 		Page<Product> productspage = proService.getAll(pageable);
 		assertEquals(products, productspage.getContent());
 	}
 
 	@Test
-	public void getAllByPartialSearch() {
+	void getAllByPartialSearch() {
 		Pageable pageable = PageRequest.of(0, 10);
 		Page<Product> productspage = proService.getAll("phone", pageable);
 		assertEquals(products, productspage.getContent());
 	}
 
-	@Test(expected = NoSuchProductFound.class)
-	public void getAllByPartialSearchNotFound() {
+	@Test
+	void getAllByPartialSearchNotFound() {
 		Pageable pageable = PageRequest.of(0, 10);
-		proService.getAll("tv", pageable);
+		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.getAll("tv", pageable));
+		assertEquals(Constants.NO_RESULT_FOUND, exception.getMessage());
 	}
 
 	@Test
-	public void getProductById() {
+	void getProductById() {
 		assertEquals(product, proService.getProductById(product.getProdId()));
 	}
 
-	@Test(expected = NoSuchProductFound.class)
-	public void getProductbyIdNotFound() {
-		proService.getProductById(5l);
+	@Test
+	void getProductbyIdNotFound() {
+		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.getProductById(5l));
+		assertEquals(Constants.PRODUCT_WITH_ID + 5l + Constants.NOT_FOUND, exception.getMessage());
 	}
 
 	@Test
-	public void updateProduct() {
+	void updateProduct() {
 		assertEquals(new Product(1l, "Tv2", "Samsoong", 696666l, "88 Oled inch", 1l),
 				proService.updateProd(product.getProdId(), productDto));
 
 	}
 
-	@Test(expected = NoSuchProductFound.class)
-	public void updateProductNotFound() {
-		proService.updateProd(9999l, productDto);
+	@Test
+	void updateProductNotFound() {
+		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.updateProd(9999l, productDto));
+		assertEquals(Constants.PRODUCT_WITH_ID + 9999l + Constants.NOT_FOUND, exception.getMessage());
 	}
 
 	@Test
-	public void addStock() {
+	void addStock() {
 		stockList.put(1l, 1l);
 		assertEquals(Constants.STOCKS_ADDED, proService.addStock(stockList));
 	}
 
 	@Test
-	public void removeStock() {
+	void removeStock() {
 		stockList.put(1l, 1l);
 		assertEquals(Constants.STOCKS_UPDATE, proService.removeStock(stockList));
 	}
 
-	@Test(expected = NegativeArgumentException.class)
-	public void removeStockQuantityExceed() {
+	@Test
+	void removeStockQuantityExceed() {
 		stockList.put(1l, 5l);
-		proService.removeStock(stockList);
-	}
-
-	@Test(expected = NegativeArgumentException.class)
-	public void negativeQuantity() {
-		stockList.put(1l, -1l);
-		stockList.put(-1l, -1l);
-		stockList.put(-1l, 1l);
-		proService.addStock(stockList);
+		Exception exception = assertThrows(NegativeArgumentException.class, () -> proService.removeStock(stockList));
+		assertEquals(Constants.CANNOT_EXCEED_QUANTITY, exception.getMessage());
 	}
 
 	@Test
-	public void deleteProductById() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+	void negativeQuantity() {
+		stockList.put(1l, -1l);
+		stockList.put(-1l, -1l);
+		stockList.put(-1l, 1l);
+		Exception exception = assertThrows(NegativeArgumentException.class, () -> proService.addStock(stockList));
+		assertEquals(Constants.CANNOT_BE_NEGATIVE, exception.getMessage());
+	}
+
+	@Test
+	void deleteProductById() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException {
 		assertEquals(product.getProdId(), proService.deleteProd(product.getProdId()));
 	}
 
-	@Test(expected = NoSuchProductFound.class)
-	public void deleteProductByIdNotFound() {
-		proService.deleteProd(10l);
+	@Test
+	void deleteProductByIdNotFound() {
+		Exception exception = assertThrows(NoSuchProductFound.class, () -> proService.deleteProd(10l));
+		assertEquals(Constants.PRODUCT_WITH_ID + 10l + Constants.NOT_FOUND, exception.getMessage());
 	}
 
 	@Test
-	public void createUser() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+	void createUser() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException {
 		assertEquals(Constants.USER_ADDED,
 				proService.createUser(Collections.singletonList(new Users(
@@ -199,7 +205,7 @@ public class ProductManagementApplicationTests {
 	}
 
 	@Test
-	public void validateUserDetails() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+	void validateUserDetails() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException {
 		Users decryptedUser = dtos.decrypt(userRepo.findByFirstName(dtos.encrypt(user).getFirstName()));
 		if (passwordEncoder.matches(user.getPassword(), decryptedUser.getPassword()))
@@ -207,8 +213,8 @@ public class ProductManagementApplicationTests {
 		assertEquals(decryptedUser, user);
 	}
 
-	@After
-	public void delete() {
+	@AfterEach
+	void delete() {
 		productRepo.deleteAll();
 		userRepo.deleteAll();
 	}
